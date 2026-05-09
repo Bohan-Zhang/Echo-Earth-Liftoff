@@ -46,8 +46,7 @@
   @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
   .section-title{font-family:var(--font-display);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:20px;display:flex;align-items:center;gap:12px;}
   .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
-
-  /* ── TIER CARDS ── */
+  
   .tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;}
   .tier-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
   .tier-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:transparent;transition:background 0.2s;}
@@ -67,7 +66,6 @@
   .tier-examples{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
   .tier-ex-tag{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
 
-  /* ── JOB GRID (unchanged) ── */
   .tier-content{display:none;animation:fadeIn 0.3s ease;}
   .tier-content.visible{display:block;}
   .tier-back{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);cursor:pointer;margin-bottom:16px;background:none;border:none;font-family:var(--font-body);transition:color 0.15s;padding:0;}
@@ -88,7 +86,6 @@
   .job-stats{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
   .stat-pill{font-size:10px;padding:2px 6px;border-radius:20px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
 
-  /* ── REST UNCHANGED ── */
   .meal-toggles{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;}
   .meal-toggle{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:var(--radius);border:1px solid var(--border);background:var(--panel);cursor:pointer;transition:all 0.2s;user-select:none;}
   .meal-toggle:hover{border-color:var(--border2);background:var(--panel2);}
@@ -190,7 +187,7 @@
   <div class="header-top">
     <div>
       <div class="logo">Star<span>Fuel</span></div>
-      <div class="tagline">Interstellar Nutrition Systems · Year 3000</div>
+      <div class="tagline">Space Nutrition Systems · Year 3000 AD </div>
     </div>
     <div class="ship-status">
       <div class="status-item"><div class="status-dot"></div>Hydroponic Bay: Online</div>
@@ -214,8 +211,7 @@
 
   <!-- Tier picker -->
   <div class="tier-grid" id="tierGrid">
-    <div class="tier-card tier-high" onclick="selectTier('high')">
-      <span class="tier-icon">⚡</span>
+    <div class="tier-card tier-high" onclick="selectTier('high')"
       <div class="tier-label">High Demand</div>
       <div class="tier-name">Physical & Engineering</div>
       <div class="tier-desc">Heavy labour, EVA, and critical systems roles with maximum caloric and protein needs.</div>
@@ -223,7 +219,6 @@
       <div class="tier-examples" id="examples-high"></div>
     </div>
     <div class="tier-card tier-medium" onclick="selectTier('medium')">
-      <span class="tier-icon">⚙️</span>
       <div class="tier-label">Medium Demand</div>
       <div class="tier-name">Technical & Operational</div>
       <div class="tier-desc">Skilled technical and support roles with balanced nutritional requirements across shifts.</div>
@@ -231,7 +226,6 @@
       <div class="tier-examples" id="examples-medium"></div>
     </div>
     <div class="tier-card tier-low" onclick="selectTier('low')">
-      <span class="tier-icon">🔬</span>
       <div class="tier-label">Low Demand</div>
       <div class="tier-name">Scientific & Administrative</div>
       <div class="tier-desc">Sedentary or light-duty roles focused on mental acuity, with emphasis on vitamins and fats.</div>
@@ -272,12 +266,10 @@
   <div class="section-title">How would you like your meals planned?</div>
   <div class="mode-cards">
     <div class="mode-card" id="mode-recipe" onclick="selectMode('recipe')">
-      <span class="mode-icon">🍽️</span>
       <div class="mode-title">Legacy Earth Recipes</div>
       <div class="mode-desc">Choose from culturally meaningful dishes adapted for space travel. Morale-boosting, familiar, and nutritionally matched to your role.</div>
     </div>
     <div class="mode-card" id="mode-prep" onclick="selectMode('prep')">
-      <span class="mode-icon">🧪</span>
       <div class="mode-title">Optimised Meal Prep</div>
       <div class="mode-desc">The system auto-builds your meals from raw ingredients calibrated to your exact job demands. Different every time you run it.</div>
       <span class="mode-badge">Auto-generated for you</span>
@@ -468,18 +460,17 @@ function generatePrep(job,activeMeals){
 
 let state={step:1,job:null,tier:null,meals:{breakfast:true,lunch:true,dinner:true},mode:null,selections:{breakfast:null,lunch:null,dinner:null},prepPlan:null};
 
-// ── Tier selection ───────────────────────────────────────────
 function selectTier(tier){
   state.tier=tier;
   state.job=null;
   document.getElementById('nextBtn1').disabled=true;
-  // Highlight selected tier card
+
   document.querySelectorAll('.tier-card').forEach(c=>c.classList.remove('selected'));
   document.querySelector('.tier-'+tier).classList.add('selected');
-  // Show job list
+
   const tc=document.getElementById('tierContent');
   tc.classList.add('visible');
-  // Update heading
+
   const meta=TIER_META[tier];
   document.getElementById('tierHeadingLabel').textContent=meta.label;
   document.getElementById('tierHeadingLabel').className='tier-heading-label '+meta.cls;
@@ -682,7 +673,7 @@ function renderResults(job,activeMeals,mode){
 
 function goTo(step,skipRender){
   if(step===4&&!skipRender)renderSec4();
-  // Reset tier UI when going back to step 1
+
   if(step===1){clearTier();}
   for(let i=1;i<=5;i++){
     document.getElementById('sec'+i).classList.toggle('visible',i===step);
