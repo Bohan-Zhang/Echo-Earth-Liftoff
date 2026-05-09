@@ -135,10 +135,7 @@
   .macro-item-label{font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:4px;}
   .macro-item-bar{height:3px;background:var(--bg2);border-radius:2px;overflow:hidden;margin-bottom:3px;}
   .macro-item-fill{height:100%;border-radius:2px;}
-  .fill-protein{background:var(--cyan);}
-  .fill-carbs{background:var(--amber);}
-  .fill-fats{background:var(--green);}
-  .fill-vitamins{background:var(--purple);}
+  .fill-cals{background:var(--purple);}
   .macro-item-val{font-size:10px;color:var(--text2);font-family:var(--font-display);}
   .reroll-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:8px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.15s;margin-top:16px;font-family:var(--font-body);}
   .reroll-btn:hover{border-color:var(--amber);color:var(--amber);}
@@ -186,9 +183,9 @@
   <div class="section-title">Select meal times for your plan</div>
   <p style="font-size:13px;color:var(--text2);margin-bottom:20px;">Choose one or more meals to include in your daily nutrition plan.</p>
   <div class="meal-toggles">
-    <div class="meal-toggle on" id="tog-breakfast" onclick="toggleMeal('breakfast')"><span style="font-size:18px">🌅</span><span class="meal-label">Breakfast</span><div class="toggle-check">✓</div></div>
-    <div class="meal-toggle on" id="tog-lunch" onclick="toggleMeal('lunch')"><span style="font-size:18px">☀️</span><span class="meal-label">Lunch</span><div class="toggle-check">✓</div></div>
-    <div class="meal-toggle on" id="tog-dinner" onclick="toggleMeal('dinner')"><span style="font-size:18px">🌙</span><span class="meal-label">Dinner</span><div class="toggle-check">✓</div></div>
+    <div class="meal-toggle on" id="tog-breakfast" onclick="toggleMeal('breakfast')"><span style="font-size:18px"></span><span class="meal-label">Breakfast</span><div class="toggle-check">✓</div></div>
+    <div class="meal-toggle on" id="tog-lunch" onclick="toggleMeal('lunch')"><span style="font-size:18px"></span><span class="meal-label">Lunch</span><div class="toggle-check">✓</div></div>
+    <div class="meal-toggle on" id="tog-dinner" onclick="toggleMeal('dinner')"><span style="font-size:18px"></span><span class="meal-label">Dinner</span><div class="toggle-check">✓</div></div>
   </div>
   <div id="mealWarn" class="warn-strip">At least one meal must be selected.</div>
   <div class="nav-bar"><button class="btn" onclick="goTo(1)">← Back</button><button class="btn btn-primary" onclick="goTo(3)">Continue →</button></div>
@@ -209,6 +206,14 @@
       <div class="mode-desc">The system auto-builds your meals from raw ingredients calibrated to your exact job demands. Different every time you run it.</div>
       <span class="mode-badge">Auto-generated for you</span>
     </div>
+    
+    <!--
+    <div class="mode-card" id="mode-recipe" onclick="selectMode('recipe')">
+      <span class="mode-icon">🍽️</span>
+      <div class="mode-title">Legacy Earth Recipes</div>
+      <div class="mode-desc">Choose from culturally meaningful dishes adapted for space travel. Morale-boosting, familiar, and nutritionally matched to your role.</div>
+    </div>
+     -->
   </div>
   <div class="nav-bar"><button class="btn" onclick="goTo(2)">← Back</button><button class="btn btn-primary" onclick="handleModeNext()" id="nextBtn3" disabled>Continue →</button></div>
 </div>

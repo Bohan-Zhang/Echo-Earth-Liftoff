@@ -1,19 +1,19 @@
 const JOBS = [
-  { name: "EVA Engineer", type: "Physical", cal: 10, pro: 10, vit: 10 },
-  { name: "Construction Specialist", type: "Physical", cal: 10, pro: 10, vit: 10 },
-  { name: "Security Officer", type: "Security", cal: 9, pro: 9, vit: 9 },
+  { name: "EVA Engineer", type: "Physical", cal: 10 },
+  { name: "Construction Specialist", type: "Physical", cal: 10 },
+  { name: "Security Officer", type: "Security", cal: 9 },
   
-  { name: "Technician", type: "Technical", cal: 8, pro: 8, vit: 9 },
-  { name: "Robotics Mechanic", type: "Technical", cal: 8, pro: 8, vit: 8 },
+  { name: "Technician", type: "Technical", cal: 8 },
+  { name: "Robotics Mechanic", type: "Technical", cal: 8 },
   
-  { name: "Medical Officer", type: "Cognitive", cal: 5, pro: 5, vit: 10 },
-  { name: "AI Systems Operator", type: "Cognitive", cal: 4, pro: 4, vit: 10 },
+  { name: "Medical Officer", type: "Cognitive", cal: 5 },
+  { name: "AI Systems Operator", type: "Cognitive", cal: 4 },
   
-  { name: "Pilot / Navigator", type: "Navigation", cal: 6, pro: 5, vit: 9 },
-  { name: "Hydroponics Farmer", type: "Navigation", cal: 7, pro: 6, vit: 8 },
+  { name: "Pilot / Navigator", type: "Navigation", cal: 6 },
+  { name: "Hydroponics Farmer", type: "Navigation", cal: 7 },
   
-  { name: "Chef / Nutrition Designer", type: "Social", cal: 6, pro: 5, vit: 9 },
-  { name: "Ship Teacher", type: "Social", cal: 4, pro: 3, vit: 9 }
+  { name: "Chef / Nutrition Designer", type: "Social", cal: 6 },
+  { name: "Ship Teacher", type: "Social", cal: 4 }
 ];
 
 const RECIPES=[
@@ -82,12 +82,12 @@ const RECIPES=[
 ];
 
 const ING={
-  protein:["insect protein flour","spirulina algae","chlorella algae","soybeans","lentils","lab-grown chicken","synthetic egg protein","mycoprotein fungi","cultured fish cells","chickpeas"],
-  carbs:["quinoa","oats","rice cultures","sweet potatoes","hydroponic potatoes","algae noodles","lentils","chickpeas"],
-  fats:["algae oil","nuts","seeds","algae milk","synthetic dairy base"],
-  vitamins:["kale","spinach","seaweed sheets","bell peppers","hydroponic tomatoes","mushrooms","yeast cultures","electrolyte mineral mix","hydroponic lettuce","garlic","onions"],
-  hydration:["electrolyte mineral mix","algae broth","seaweed sheets"],
-  flavour:["fermented soy paste","garlic","onions","herbs","spices","lemongrass","yeast cultures"]
+    protein: ["Soy Chunks", "Quorn", "Lentils"],
+    carbs: ["Rice", "Oats", "Pasta"],
+    fats: ["Olive Oil", "Nuts", "Avocado"],
+    vitamins: ["Kale", "Spinach", "Carrots"],
+    flavour: ["Garlic", "Soy Sauce", "Ginger"],
+    hydration: ["Electrolyte Pack", "Coconut Water"]
 };
 
 const METHODS=[

@@ -22,8 +22,7 @@ function renderJobs(filter=''){
       <div class="job-name">${j.name}</div>
       <div class="job-stats">
         <span class="stat-pill">CALORIES ${j.cal}</span>
-        <span class="stat-pill">PROTEIN ${j.pro}</span>
-        <span class="stat-pill">VITAMINS ${j.vit}</span>
+        
       </div>
     </div>`).join('');
 }
@@ -49,14 +48,23 @@ function selectMode(mode){
   document.getElementById('nextBtn3').disabled=false;
 }
 
-function handleModeNext(){
-  if(state.mode==='recipe'){goTo(4);}
-  else{
-    const job=JOBS.find(j=>j.name===state.job);
-    const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
-    state.prepPlan=generatePrep(job,active);
-    renderResults(job,active,'prep');
-    goTo(5,true);
+function handleModeNext() {
+  console.log("Mode Next Clicked! Current Mode:", state.mode);
+
+
+  console.log(Date.now());
+  if (state.mode === 'recipe') { 
+    goTo(4); 
+  } else if (state.mode === 'prep') {
+    const job = JOBS.find(j => j.name === state.job);
+    const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
+    
+    console.log("Generating prep for:", job.name);
+    state.prepPlan = generatePrep(job, active);
+    renderResults(job, active, 'prep');
+    goTo(5, true);
+  } else {
+    alert("Please select a mode first!");
   }
 }
 
@@ -124,7 +132,7 @@ function rerollPrep(){
 }
 
 function renderResults(job,activeMeals,mode){
-  const macroRows=[['Protein','pro','fill-protein'],['Carbohydrates','carb','fill-carbs'],['Healthy Fats','fat','fill-fats'],['Vitamins & Minerals','vit','fill-vitamins'],['Hydration','hyd','fill-protein'],['Calories','cal','fill-carbs']];
+  const macroRows=[['Calories','cal','Come back soon']];
   let meals='';
 
   if(mode==='recipe'){
@@ -149,8 +157,6 @@ function renderResults(job,activeMeals,mode){
     state.prepPlan.forEach(p=>{
       const allIng=[
         ...p.cal.map(i=>({name:i,role:'Calories'})),
-        ...p.proteins.map(i=>({name:i,role:'Protein'})),
-        ...p.vitamins.map(i=>({name:i,role:'Vitamins'})),
       ];
       meals+=`<div class="prep-result-card">
         <div class="prep-result-header">
