@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StarFuel — Interstellar Nutrition Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#04080f;--bg2:#080f1c;--bg3:#0c1628;--panel:#0e1a2e;--panel2:#111f35;
+    --border:rgba(56,189,248,0.15);--border2:rgba(56,189,248,0.3);
+    --cyan:#38bdf8;--cyan2:#7dd3fc;--cyan-dim:rgba(56,189,248,0.08);
+    --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.1);
+    --green:#34d399;--green-dim:rgba(52,211,153,0.1);
+    --purple:#a78bfa;--purple-dim:rgba(167,139,250,0.1);
+    --red:#f87171;--red-dim:rgba(248,113,113,0.08);
+    --text:#e2f0ff;--text2:#8ba8c8;--text3:#4a6a8a;
+    --font-display:'Orbitron',monospace;--font-body:'DM Sans',sans-serif;
+    --radius:6px;--radius-lg:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(1px 1px at 10% 20%,rgba(255,255,255,0.6) 0%,transparent 100%),radial-gradient(1px 1px at 35% 60%,rgba(255,255,255,0.4) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 55% 10%,rgba(255,255,255,0.7) 0%,transparent 100%),radial-gradient(1px 1px at 80% 45%,rgba(255,255,255,0.3) 0%,transparent 100%),radial-gradient(1px 1px at 22% 80%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 90% 15%,rgba(255,255,255,0.6) 0%,transparent 100%),radial-gradient(1px 1px at 60% 85%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1px 1px at 95% 55%,rgba(255,255,255,0.5) 0%,transparent 100%);pointer-events:none;z-index:0;}
+  body::after{content:'';position:fixed;top:-20%;right:-10%;width:60vw;height:60vh;background:radial-gradient(ellipse,rgba(56,189,248,0.04) 0%,transparent 70%);pointer-events:none;z-index:0;}
+  .container{max-width:1100px;margin:0 auto;padding:0 24px;position:relative;z-index:1;}
+  header{padding:32px 0 24px;border-bottom:1px solid var(--border);margin-bottom:40px;}
+  .header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+  .logo{font-family:var(--font-display);font-size:28px;font-weight:900;letter-spacing:0.12em;color:var(--cyan);text-transform:uppercase;line-height:1;}
+  .logo span{color:var(--amber);}
+  .tagline{font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);font-weight:300;margin-top:6px;}
+  .ship-status{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+  .status-item{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);}
+  .status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+  .step-flow{display:flex;margin-bottom:40px;position:relative;}
+  .step-flow::before{content:'';position:absolute;top:20px;left:20px;right:20px;height:1px;background:var(--border);}
+  .step{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;position:relative;}
+  .step-num{width:40px;height:40px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text3);transition:all 0.3s;position:relative;z-index:1;}
+  .step.active .step-num{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim);box-shadow:0 0 16px rgba(56,189,248,0.2);}
+  .step.done .step-num{border-color:var(--green);color:var(--green);background:var(--green-dim);}
+  .step-label{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);text-align:center;}
+  .step.active .step-label{color:var(--cyan);}
+  .step.done .step-label{color:var(--green);}
+  .section{display:none;animation:fadeIn 0.4s ease;}
+  .section.visible{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .section-title{font-family:var(--font-display);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* ── TIER CARDS ── */
+  .tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;}
+  .tier-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+  .tier-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:transparent;transition:background 0.2s;}
+  .tier-card:hover{border-color:var(--border2);background:var(--panel2);}
+  .tier-card.selected{background:var(--cyan-dim);}
+  .tier-card.tier-high.selected{border-color:var(--red);}.tier-card.tier-high.selected::before{background:var(--red);}
+  .tier-card.tier-medium.selected{border-color:var(--amber);}.tier-card.tier-medium.selected::before{background:var(--amber);}
+  .tier-card.tier-low.selected{border-color:var(--green);}.tier-card.tier-low.selected::before{background:var(--green);}
+  .tier-icon{font-size:26px;margin-bottom:8px;display:block;}
+  .tier-label{font-family:var(--font-display);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:4px;}
+  .tier-high .tier-label{color:var(--red);}
+  .tier-medium .tier-label{color:var(--amber);}
+  .tier-low .tier-label{color:var(--green);}
+  .tier-name{font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px;}
+  .tier-desc{font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:10px;}
+  .tier-count{font-family:var(--font-display);font-size:10px;color:var(--text3);}
+  .tier-examples{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+  .tier-ex-tag{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+
+  /* ── JOB GRID (unchanged) ── */
+  .tier-content{display:none;animation:fadeIn 0.3s ease;}
+  .tier-content.visible{display:block;}
+  .tier-back{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);cursor:pointer;margin-bottom:16px;background:none;border:none;font-family:var(--font-body);transition:color 0.15s;padding:0;}
+  .tier-back:hover{color:var(--cyan);}
+  .tier-heading{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .tier-heading-label{font-family:var(--font-display);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+  .tier-heading-label.high{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,0.25);}
+  .tier-heading-label.medium{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(251,191,36,0.25);}
+  .tier-heading-label.low{background:var(--green-dim);color:var(--green);border:1px solid rgba(52,211,153,0.25);}
+  .job-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:32px;}
+  .job-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+  .job-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:transparent;transition:background 0.2s;}
+  .job-card:hover{border-color:var(--border2);background:var(--panel2);}
+  .job-card.selected{border-color:var(--cyan);background:var(--cyan-dim);}
+  .job-card.selected::before{background:var(--cyan);}
+  .job-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;line-height:1.3;}
+  .job-rating{font-family:var(--font-display);font-size:10px;color:var(--amber);}
+  .job-stats{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
+  .stat-pill{font-size:10px;padding:2px 6px;border-radius:20px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+
+  /* ── REST UNCHANGED ── */
+  .meal-toggles{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;}
+  .meal-toggle{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:var(--radius);border:1px solid var(--border);background:var(--panel);cursor:pointer;transition:all 0.2s;user-select:none;}
+  .meal-toggle:hover{border-color:var(--border2);background:var(--panel2);}
+  .meal-toggle.on{border-color:var(--cyan);background:var(--cyan-dim);color:var(--cyan);}
+  .meal-label{font-size:13px;font-weight:500;}
+  .toggle-check{width:16px;height:16px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);display:flex;align-items:center;justify-content:center;margin-left:4px;font-size:10px;}
+  .meal-toggle.on .toggle-check{border-color:var(--cyan);background:var(--cyan);color:var(--bg);}
+  .mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px;}
+  .mode-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;cursor:pointer;transition:all 0.2s;}
+  .mode-card:hover{border-color:var(--border2);background:var(--panel2);}
+  .mode-card.selected{border-color:var(--cyan);background:var(--cyan-dim);}
+  .mode-icon{font-size:30px;margin-bottom:10px;display:block;}
+  .mode-title{font-family:var(--font-display);font-size:12px;letter-spacing:0.1em;color:var(--text);margin-bottom:8px;text-transform:uppercase;}
+  .mode-desc{font-size:13px;color:var(--text2);line-height:1.5;}
+  .mode-badge{display:inline-block;font-size:10px;padding:3px 9px;border-radius:20px;background:var(--green-dim);border:1px solid rgba(52,211,153,0.25);color:var(--green);margin-top:10px;letter-spacing:0.08em;}
+  .recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:12px;margin-bottom:24px;}
+  .recipe-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:all 0.2s;position:relative;}
+  .recipe-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+  .recipe-card.selected{border-color:var(--cyan);}
+  .recipe-card.selected::after{content:'✓';position:absolute;top:8px;right:10px;width:22px;height:22px;background:var(--cyan);color:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+  .recipe-flag{font-size:24px;padding:14px 16px 8px;display:block;line-height:1;}
+  .recipe-info{padding:0 16px 14px;}
+  .recipe-name{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px;}
+  .recipe-origin{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;}
+  .recipe-adapt{display:flex;flex-wrap:wrap;gap:4px;}
+  .adapt-tag{font-size:10px;padding:2px 7px;border-radius:20px;background:rgba(56,189,248,0.08);color:var(--cyan2);border:1px solid rgba(56,189,248,0.15);}
+  .meal-slot-label{font-size:11px;text-transform:uppercase;letter-spacing:0.15em;color:var(--text3);margin-bottom:12px;margin-top:20px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+  .country-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+  .country-btn{font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--panel);color:var(--text2);cursor:pointer;transition:all 0.15s;}
+  .country-btn:hover,.country-btn.active{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim);}
+  .search-bar{width:100%;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;color:var(--text);font-family:var(--font-body);font-size:14px;margin-bottom:16px;outline:none;transition:border-color 0.2s;}
+  .search-bar::placeholder{color:var(--text3);}
+  .search-bar:focus{border-color:var(--cyan);}
+  .warn-strip{background:var(--amber-dim);border:1px solid rgba(251,191,36,0.25);border-radius:var(--radius);padding:10px 16px;font-size:12px;color:var(--amber);margin-bottom:16px;display:none;}
+  .warn-strip.visible{display:block;}
+  .nav-bar{display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:var(--radius);border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;letter-spacing:0.05em;text-transform:uppercase;}
+  .btn:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim);}
+  .btn-primary{background:var(--cyan);border-color:var(--cyan);color:var(--bg);font-weight:600;}
+  .btn-primary:hover{background:var(--cyan2);border-color:var(--cyan2);color:var(--bg);}
+  .btn:disabled{opacity:0.3;cursor:not-allowed;pointer-events:none;}
+  .result-hero{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:24px;position:relative;overflow:hidden;}
+  .result-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),transparent);}
+  .result-job{font-family:var(--font-display);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px;}
+  .result-headline{font-size:22px;font-weight:500;color:var(--text);margin-bottom:4px;}
+  .result-sub{font-size:13px;color:var(--text2);}
+  .nutrition-radar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0 0;}
+  .radar-item{background:var(--bg3);border-radius:var(--radius);padding:12px;}
+  .radar-label{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:6px;}
+  .radar-bar{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;margin-bottom:4px;}
+  .radar-fill{height:100%;border-radius:2px;}
+  .radar-val{font-family:var(--font-display);font-size:11px;color:var(--text2);}
+  .meals-output{display:grid;gap:14px;}
+  .meal-result{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+  .meal-result-header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg3);}
+  .meal-time-badge{font-family:var(--font-display);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;padding:4px 10px;border-radius:20px;border:1px solid var(--border2);color:var(--text2);}
+  .meal-time-badge.breakfast{border-color:var(--amber);color:var(--amber);}
+  .meal-time-badge.lunch{border-color:var(--green);color:var(--green);}
+  .meal-time-badge.dinner{border-color:var(--cyan);color:var(--cyan);}
+  .meal-result-name{font-size:15px;font-weight:500;color:var(--text);}
+  .meal-result-body{padding:16px 20px;}
+  .ingredient-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+  .ing-chip{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+  .meal-why{font-size:12px;color:var(--text3);font-style:italic;padding-top:10px;border-top:1px solid var(--border);}
+  .meal-why span{color:var(--amber);font-style:normal;margin-right:6px;}
+  .prep-result-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+  .prep-result-header{padding:16px 20px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .prep-auto-label{font-family:var(--font-display);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;padding:4px 10px;border-radius:20px;border:1px solid rgba(167,139,250,0.3);color:var(--purple);}
+  .prep-body{padding:18px 20px;}
+  .prep-section{margin-bottom:16px;}
+  .prep-section-title{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:8px;}
+  .prep-ing-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid rgba(56,189,248,0.06);}
+  .prep-ing-name{font-size:13px;color:var(--text);flex:1;}
+  .prep-ing-role{font-size:10px;color:var(--text3);letter-spacing:0.06em;}
+  .prep-instructions{background:var(--bg3);border-radius:var(--radius);padding:14px 16px;font-size:13px;color:var(--text2);line-height:1.7;margin-top:14px;}
+  .prep-instructions b{color:var(--amber);font-weight:500;}
+  .macro-strip{display:flex;gap:8px;margin-top:14px;}
+  .macro-item{flex:1;background:var(--bg3);border-radius:var(--radius);padding:8px 10px;}
+  .macro-item-label{font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:4px;}
+  .macro-item-bar{height:3px;background:var(--bg2);border-radius:2px;overflow:hidden;margin-bottom:3px;}
+  .macro-item-fill{height:100%;border-radius:2px;}
+  .fill-protein{background:var(--cyan);}
+  .fill-carbs{background:var(--amber);}
+  .fill-fats{background:var(--green);}
+  .fill-vitamins{background:var(--purple);}
+  .macro-item-val{font-size:10px;color:var(--text2);font-family:var(--font-display);}
+  .reroll-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:8px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.15s;margin-top:16px;font-family:var(--font-body);}
+  .reroll-btn:hover{border-color:var(--amber);color:var(--amber);}
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+  @media(max-width:640px){.tier-grid{grid-template-columns:1fr;}.job-grid{grid-template-columns:1fr 1fr;}.mode-cards{grid-template-columns:1fr;}.nutrition-radar{grid-template-columns:repeat(2,1fr);}.macro-strip{flex-wrap:wrap;}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="logo">Star<span>Fuel</span></div>
+      <div class="tagline">Interstellar Nutrition Systems · Year 3000</div>
+    </div>
+    <div class="ship-status">
+      <div class="status-item"><div class="status-dot"></div>Hydroponic Bay: Online</div>
+      <div class="status-item"><div class="status-dot"></div>Protein Lab: Operational</div>
+      <div class="status-item"><div class="status-dot"></div>Galley: Accepting Plans</div>
+    </div>
+  </div>
+</header>
+
+<div class="step-flow">
+  <div class="step active" id="step1"><div class="step-num">01</div><div class="step-label">Your Role</div></div>
+  <div class="step" id="step2"><div class="step-num">02</div><div class="step-label">Meal Times</div></div>
+  <div class="step" id="step3"><div class="step-num">03</div><div class="step-label">Plan Mode</div></div>
+  <div class="step" id="step4"><div class="step-num">04</div><div class="step-label">Choose Meals</div></div>
+  <div class="step" id="step5"><div class="step-num">05</div><div class="step-label">Your Plan</div></div>
+</div>
+
+<!-- STEP 1 -->
+<div class="section visible" id="sec1">
+  <div class="section-title">Select your shipboard role</div>
+
+  <!-- Tier picker -->
+  <div class="tier-grid" id="tierGrid">
+    <div class="tier-card tier-high" onclick="selectTier('high')">
+      <span class="tier-icon">⚡</span>
+      <div class="tier-label">High Demand</div>
+      <div class="tier-name">Physical & Engineering</div>
+      <div class="tier-desc">Heavy labour, EVA, and critical systems roles with maximum caloric and protein needs.</div>
+      <div class="tier-count" id="count-high"></div>
+      <div class="tier-examples" id="examples-high"></div>
+    </div>
+    <div class="tier-card tier-medium" onclick="selectTier('medium')">
+      <span class="tier-icon">⚙️</span>
+      <div class="tier-label">Medium Demand</div>
+      <div class="tier-name">Technical & Operational</div>
+      <div class="tier-desc">Skilled technical and support roles with balanced nutritional requirements across shifts.</div>
+      <div class="tier-count" id="count-medium"></div>
+      <div class="tier-examples" id="examples-medium"></div>
+    </div>
+    <div class="tier-card tier-low" onclick="selectTier('low')">
+      <span class="tier-icon">🔬</span>
+      <div class="tier-label">Low Demand</div>
+      <div class="tier-name">Scientific & Administrative</div>
+      <div class="tier-desc">Sedentary or light-duty roles focused on mental acuity, with emphasis on vitamins and fats.</div>
+      <div class="tier-count" id="count-low"></div>
+      <div class="tier-examples" id="examples-low"></div>
+    </div>
+  </div>
+
+  <!-- Job list (shown after tier selected) -->
+  <div class="tier-content" id="tierContent">
+    <button class="tier-back" onclick="clearTier()">← Change tier</button>
+    <div class="tier-heading">
+      <span class="tier-heading-label" id="tierHeadingLabel"></span>
+      <span style="font-size:13px;color:var(--text2)" id="tierHeadingName"></span>
+    </div>
+    <input class="search-bar" type="text" placeholder="Search roles…" id="jobSearch" oninput="filterJobs(this.value)">
+    <div class="job-grid" id="jobGrid"></div>
+  </div>
+
+  <div class="nav-bar"><div></div><button class="btn btn-primary" onclick="goTo(2)" id="nextBtn1" disabled>Continue →</button></div>
+</div>
+
+<!-- STEP 2 -->
+<div class="section" id="sec2">
+  <div class="section-title">Select meal times for your plan</div>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:20px;">Choose one or more meals to include in your daily nutrition plan.</p>
+  <div class="meal-toggles">
+    <div class="meal-toggle on" id="tog-breakfast" onclick="toggleMeal('breakfast')"><span style="font-size:18px">🌅</span><span class="meal-label">Breakfast</span><div class="toggle-check">✓</div></div>
+    <div class="meal-toggle on" id="tog-lunch" onclick="toggleMeal('lunch')"><span style="font-size:18px">☀️</span><span class="meal-label">Lunch</span><div class="toggle-check">✓</div></div>
+    <div class="meal-toggle on" id="tog-dinner" onclick="toggleMeal('dinner')"><span style="font-size:18px">🌙</span><span class="meal-label">Dinner</span><div class="toggle-check">✓</div></div>
+  </div>
+  <div id="mealWarn" class="warn-strip">At least one meal must be selected.</div>
+  <div class="nav-bar"><button class="btn" onclick="goTo(1)">← Back</button><button class="btn btn-primary" onclick="goTo(3)">Continue →</button></div>
+</div>
+
+<!-- STEP 3 -->
+<div class="section" id="sec3">
+  <div class="section-title">How would you like your meals planned?</div>
+  <div class="mode-cards">
+    <div class="mode-card" id="mode-recipe" onclick="selectMode('recipe')">
+      <span class="mode-icon">🍽️</span>
+      <div class="mode-title">Legacy Earth Recipes</div>
+      <div class="mode-desc">Choose from culturally meaningful dishes adapted for space travel. Morale-boosting, familiar, and nutritionally matched to your role.</div>
+    </div>
+    <div class="mode-card" id="mode-prep" onclick="selectMode('prep')">
+      <span class="mode-icon">🧪</span>
+      <div class="mode-title">Optimised Meal Prep</div>
+      <div class="mode-desc">The system auto-builds your meals from raw ingredients calibrated to your exact job demands. Different every time you run it.</div>
+      <span class="mode-badge">Auto-generated for you</span>
+    </div>
+  </div>
+  <div class="nav-bar"><button class="btn" onclick="goTo(2)">← Back</button><button class="btn btn-primary" onclick="handleModeNext()" id="nextBtn3" disabled>Continue →</button></div>
+</div>
+
+<!-- STEP 4 (recipes only) -->
+<div class="section" id="sec4">
+  <div class="section-title">Select your legacy earth recipes</div>
+  <div id="sec4Content"></div>
+  <div class="nav-bar"><button class="btn" onclick="goTo(3)">← Back</button><button class="btn btn-primary" onclick="buildRecipePlan()" id="nextBtn4" disabled>Generate Plan →</button></div>
+</div>
+
+<!-- STEP 5 -->
+<div class="section" id="sec5">
+  <div class="section-title">Your personalised nutrition plan</div>
+  <div id="resultContent"></div>
+  <div class="nav-bar">
+    <button class="btn" onclick="goBack()">← Modify</button>
+    <button class="btn btn-primary" onclick="goTo(1)">New Plan ↺</button>
+  </div>
+</div>
+
+</div>
+<script>
+const JOBS=[
+  {name:"EVA Engineer",cal:10,pro:10,carb:8,fat:7,vit:9,hyd:10,rating:"9.8/10"},
+  {name:"Hydroponics Farmer",cal:7,pro:6,carb:7,fat:4,vit:8,hyd:8,rating:"7.6/10"},
+  {name:"Reactor Technician",cal:8,pro:8,carb:7,fat:6,vit:9,hyd:9,rating:"8.7/10"},
+  {name:"Pilot / Navigator",cal:6,pro:5,carb:8,fat:8,vit:9,hyd:7,rating:"8.0/10"},
+  {name:"AI Systems Operator",cal:4,pro:4,carb:7,fat:9,vit:10,hyd:6,rating:"7.8/10"},
+  {name:"Medical Officer",cal:5,pro:5,carb:6,fat:8,vit:10,hyd:7,rating:"7.9/10"},
+  {name:"Security Officer",cal:9,pro:9,carb:7,fat:6,vit:8,hyd:9,rating:"9.0/10"},
+  {name:"Construction Specialist",cal:10,pro:10,carb:9,fat:5,vit:8,hyd:10,rating:"9.7/10"},
+  {name:"Terraforming Specialist",cal:8,pro:7,carb:7,fat:5,vit:9,hyd:9,rating:"8.5/10"},
+  {name:"Biologist / Geneticist",cal:4,pro:4,carb:6,fat:8,vit:10,hyd:6,rating:"7.5/10"},
+  {name:"Chef / Nutrition Designer",cal:6,pro:5,carb:7,fat:7,vit:9,hyd:7,rating:"7.8/10"},
+  {name:"Waste Recycling Operator",cal:7,pro:7,carb:6,fat:4,vit:8,hyd:9,rating:"7.9/10"},
+  {name:"Mining Specialist",cal:10,pro:10,carb:8,fat:5,vit:8,hyd:10,rating:"9.6/10"},
+  {name:"Ship Teacher / Historian",cal:4,pro:3,carb:6,fat:7,vit:9,hyd:5,rating:"6.8/10"},
+  {name:"Psychological Support Officer",cal:5,pro:4,carb:6,fat:9,vit:10,hyd:6,rating:"7.7/10"},
+  {name:"Robotics Mechanic",cal:8,pro:8,carb:7,fat:5,vit:8,hyd:8,rating:"8.4/10"},
+  {name:"Cargo Loader",cal:10,pro:9,carb:9,fat:4,vit:7,hyd:10,rating:"9.4/10"},
+  {name:"Environmental Systems Manager",cal:6,pro:5,carb:6,fat:7,vit:10,hyd:8,rating:"8.0/10"},
+  {name:"Communications Officer",cal:4,pro:3,carb:7,fat:8,vit:9,hyd:5,rating:"7.0/10"},
+  {name:"Research Scientist",cal:4,pro:4,carb:7,fat:8,vit:10,hyd:6,rating:"7.6/10"},
+  {name:"Cryogenics Technician",cal:5,pro:5,carb:6,fat:6,vit:9,hyd:7,rating:"7.8/10"},
+  {name:"Astronomer / Star Mapper",cal:4,pro:3,carb:7,fat:8,vit:9,hyd:5,rating:"7.2/10"},
+  {name:"Quantum Drive Engineer",cal:7,pro:7,carb:7,fat:5,vit:8,hyd:8,rating:"8.1/10"},
+  {name:"Trauma Surgeon",cal:6,pro:6,carb:6,fat:7,vit:10,hyd:8,rating:"8.2/10"},
+  {name:"Xenobiologist",cal:4,pro:4,carb:6,fat:8,vit:10,hyd:6,rating:"7.6/10"},
+  {name:"Ship Chaplain / Counsellor",cal:3,pro:3,carb:6,fat:7,vit:9,hyd:5,rating:"6.5/10"},
+  {name:"Drone Operator",cal:5,pro:4,carb:7,fat:8,vit:8,hyd:6,rating:"7.4/10"},
+  {name:"Astrophysicist",cal:4,pro:4,carb:7,fat:8,vit:10,hyd:5,rating:"7.5/10"},
+  {name:"Hull Maintenance Diver",cal:9,pro:9,carb:8,fat:6,vit:8,hyd:10,rating:"9.2/10"},
+  {name:"Ship Archivist",cal:3,pro:3,carb:6,fat:7,vit:8,hyd:4,rating:"6.3/10"},
+  {name:"Genetic Farmer",cal:6,pro:5,carb:7,fat:5,vit:9,hyd:7,rating:"7.7/10"},
+  {name:"Weapons & Defence Specialist",cal:9,pro:9,carb:8,fat:5,vit:7,hyd:9,rating:"9.1/10"},
+  {name:"Fuel Systems Engineer",cal:7,pro:7,carb:7,fat:6,vit:8,hyd:8,rating:"8.0/10"},
+  {name:"Stellar Cartographer",cal:4,pro:3,carb:7,fat:8,vit:9,hyd:5,rating:"7.1/10"},
+  {name:"Midwife / Birth Specialist",cal:5,pro:5,carb:6,fat:8,vit:10,hyd:7,rating:"7.9/10"},
+  {name:"Ship Musician / Artist",cal:3,pro:3,carb:6,fat:7,vit:8,hyd:4,rating:"6.2/10"},
+  {name:"Ethics & Governance Officer",cal:4,pro:3,carb:6,fat:8,vit:9,hyd:5,rating:"6.9/10"},
+  {name:"Linguist / Cultural Officer",cal:4,pro:3,carb:6,fat:7,vit:9,hyd:5,rating:"6.7/10"},
+  {name:"Food Systems Technician",cal:6,pro:5,carb:7,fat:6,vit:9,hyd:7,rating:"7.8/10"},
+  {name:"Nanomedicine Specialist",cal:5,pro:5,carb:6,fat:8,vit:10,hyd:6,rating:"8.0/10"},
+];
+
+// ── Tier classification ──────────────────────────────────────
+function jobTier(cal){return cal>=8?'high':cal>=5?'medium':'low';}
+
+const TIER_META={
+  high:{label:'High Demand',cls:'high'},
+  medium:{label:'Medium Demand',cls:'medium'},
+  low:{label:'Low Demand',cls:'low'},
+};
+
+// Populate tier card counts + example tags on load
+(function initTiers(){
+  ['high','medium','low'].forEach(t=>{
+    const jobs=JOBS.filter(j=>jobTier(j.cal)===t);
+    document.getElementById('count-'+t).textContent=jobs.length+' roles';
+    document.getElementById('examples-'+t).innerHTML=
+      jobs.slice(0,3).map(j=>`<span class="tier-ex-tag">${j.name}</span>`).join('')+
+      (jobs.length>3?`<span class="tier-ex-tag">+${jobs.length-3} more</span>`:'');
+  });
+})();
+
+const RECIPES=[
+  {flag:"🇮🇳",name:"Butter Chicken",origin:"India",tags:["lab-grown chicken","hydroponic tomatoes","synthetic dairy","algae oil","garlic","onions"],why:"High morale meal. Strong cultural value. Protein-rich.",pro:8,carb:4,fat:7,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇳",name:"Dal Tadka",origin:"India",tags:["lentils","fermented soy paste","onions","garlic","yeast cultures","spices"],why:"Sustainable lentil base. Excellent plant protein and fibre.",pro:7,carb:7,fat:3,vit:7,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇮🇳",name:"Masala Oats",origin:"India",tags:["oats","onions","hydroponic tomatoes","garlic","yeast cultures"],why:"High-satiety breakfast, sustained energy release.",pro:5,carb:8,fat:3,vit:7,mealTypes:["breakfast"]},
+  {flag:"🇮🇳",name:"Chana Masala",origin:"India",tags:["chickpeas","hydroponic tomatoes","onions","garlic","bell peppers","spices"],why:"Iron and fibre powerhouse. Fully plant-based, zero waste.",pro:8,carb:7,fat:3,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇳",name:"Khichdi",origin:"India",tags:["rice cultures","lentils","onions","garlic","seeds","yeast cultures"],why:"The original recovery meal. Easy digestion post-shift.",pro:7,carb:8,fat:2,vit:7,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇯🇵",name:"Ramen",origin:"Japan",tags:["algae noodles","synthetic egg protein","seaweed sheets","fungal broth"],why:"Efficient ingredients + comforting warmth.",pro:7,carb:7,fat:4,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇯🇵",name:"Onigiri",origin:"Japan",tags:["rice cultures","seaweed sheets","fermented soy paste","seeds"],why:"Compact, portable, high morale.",pro:4,carb:9,fat:2,vit:5,mealTypes:["breakfast","lunch"]},
+  {flag:"🇯🇵",name:"Miso Soup & Rice",origin:"Japan",tags:["fermented soy paste","seaweed sheets","rice cultures","mushrooms","yeast cultures"],why:"Probiotic-rich. Gut health critical on long voyages.",pro:5,carb:8,fat:2,vit:8,mealTypes:["breakfast","lunch"]},
+  {flag:"🇯🇵",name:"Tofu Teriyaki Bowl",origin:"Japan",tags:["soybeans","fermented soy paste","rice cultures","seaweed sheets","seeds","algae oil"],why:"Complete amino acids from soy. Algae oil boosts omega-3.",pro:8,carb:7,fat:5,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇲🇽",name:"Tacos",origin:"Mexico",tags:["insect protein tortillas","lentils","lab-grown chicken","hydroponic vegetables"],why:"Flexible recipe using minimal resources.",pro:9,carb:6,fat:4,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇲🇽",name:"Black Bean Burrito",origin:"Mexico",tags:["soybeans","rice cultures","hydroponic lettuce","fermented soy paste","bell peppers"],why:"Dense calorie and protein payload for heavy-duty crews.",pro:8,carb:8,fat:3,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🇲🇽",name:"Pozole de Hongos",origin:"Mexico",tags:["mycoprotein fungi","hydroponic vegetables","onions","garlic","herbs","bell peppers"],why:"Traditional stew adapted. Fungi = sustainable protein.",pro:7,carb:7,fat:3,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇬🇧",name:"Shepherd's Pie",origin:"United Kingdom",tags:["hydroponic potatoes","mycoprotein fungi","algae oil","onions","garlic"],why:"Dense calories for physical workers.",pro:7,carb:8,fat:5,vit:6,mealTypes:["dinner"]},
+  {flag:"🇬🇧",name:"Porridge & Seeds",origin:"United Kingdom",tags:["oats","seeds","fruit cell cultures","yeast cultures"],why:"Slow-release energy. Ideal pre-shift morning meal.",pro:5,carb:8,fat:5,vit:7,mealTypes:["breakfast"]},
+  {flag:"🇬🇧",name:"Lentil Cottage Pie",origin:"United Kingdom",tags:["lentils","hydroponic potatoes","mushrooms","onions","garlic"],why:"100% plant-based. Zero waste. High protein efficiency.",pro:8,carb:8,fat:2,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇰🇷",name:"Bibimbap",origin:"South Korea",tags:["rice cultures","hydroponic greens","synthetic egg protein","fermented soy paste"],why:"Balanced nutrition in one bowl.",pro:7,carb:8,fat:5,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇰🇷",name:"Kimchi Fried Rice",origin:"South Korea",tags:["rice cultures","fermented soy paste","synthetic egg protein","seaweed sheets","yeast cultures"],why:"Fermented foods support gut microbiome in zero-G.",pro:6,carb:8,fat:4,vit:8,mealTypes:["breakfast","lunch"]},
+  {flag:"🇰🇷",name:"Sundubu Jjigae",origin:"South Korea",tags:["soybeans","mushrooms","hydroponic greens","seaweed sheets","fermented soy paste","synthetic egg protein"],why:"Silken tofu stew. High protein, anti-inflammatory.",pro:8,carb:4,fat:5,vit:9,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇮🇹",name:"Margherita Pizza",origin:"Italy",tags:["algae flour crust","hydroponic tomatoes","synthetic dairy","herbs"],why:"Massive morale booster and social food.",pro:6,carb:8,fat:6,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇹",name:"Pasta e Fagioli",origin:"Italy",tags:["lentils","chickpeas","fermented soy paste","onions","garlic","seaweed sheets"],why:"Complete amino acid profile. Low resource cost.",pro:8,carb:8,fat:2,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇹",name:"Risotto ai Funghi",origin:"Italy",tags:["rice cultures","mycoprotein fungi","synthetic dairy","yeast cultures","onions","algae oil"],why:"Warming comfort food. Fungi = low-impact protein.",pro:6,carb:8,fat:6,vit:7,mealTypes:["dinner"]},
+  {flag:"🇻🇳",name:"Pho",origin:"Vietnam",tags:["algae broth","rice cultures","hydroponic herbs","cultured beef strips"],why:"Hydrating and efficient.",pro:7,carb:7,fat:3,vit:9,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇻🇳",name:"Bánh Mì Bowl",origin:"Vietnam",tags:["insect protein flour","fermented soy paste","hydroponic lettuce","rice cultures"],why:"Street-food efficiency. High morale from complex flavours.",pro:8,carb:7,fat:4,vit:7,mealTypes:["lunch"]},
+  {flag:"🌍",name:"Falafel Wraps",origin:"Middle East",tags:["chickpeas","algae flatbread","hydroponic lettuce","herbs","garlic"],why:"Cheap, sustainable protein source.",pro:8,carb:7,fat:4,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🌍",name:"Shakshuka",origin:"North Africa",tags:["hydroponic tomatoes","synthetic egg protein","onions","garlic","bell peppers","spices"],why:"Iron-rich, anti-inflammatory. Excellent crew wellness food.",pro:7,carb:5,fat:5,vit:9,mealTypes:["breakfast","lunch"]},
+  {flag:"🌍",name:"Hummus & Flatbread",origin:"Middle East",tags:["chickpeas","algae oil","garlic","algae flatbread","seeds"],why:"High-fibre snack. Excellent calcium source.",pro:6,carb:7,fat:6,vit:6,mealTypes:["breakfast","lunch"]},
+  {flag:"🌍",name:"Tagine de Lentilles",origin:"Morocco",tags:["lentils","hydroponic tomatoes","onions","garlic","sweet potatoes","spices"],why:"North African spice blend fights inflammation. Dense nutrients.",pro:8,carb:8,fat:2,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🌍",name:"Koshari",origin:"Egypt",tags:["rice cultures","lentils","chickpeas","onions","hydroponic tomatoes","garlic"],why:"Three complete proteins in one bowl.",pro:8,carb:9,fat:2,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇨🇳",name:"Fried Rice",origin:"China",tags:["rice cultures","synthetic egg protein","hydroponic vegetables","fermented soy paste"],why:"Uses leftovers efficiently with minimal waste.",pro:6,carb:8,fat:4,vit:6,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇨🇳",name:"Congee",origin:"China",tags:["rice cultures","seaweed sheets","fermented soy paste","mushrooms"],why:"Ultra light, restorative. Ideal for recovery days.",pro:4,carb:8,fat:1,vit:7,mealTypes:["breakfast"]},
+  {flag:"🇨🇳",name:"Mapo Tofu",origin:"China",tags:["soybeans","mycoprotein fungi","fermented soy paste","onions","garlic","algae oil"],why:"Complete protein. Spiced oil aids circulation on long shifts.",pro:9,carb:3,fat:6,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇨🇦",name:"Poutine",origin:"Canada",tags:["hydroponic potato fries","synthetic dairy curds","mycoprotein gravy"],why:"Comfort food during morale crises.",pro:5,carb:9,fat:6,vit:4,mealTypes:["lunch","dinner"]},
+  {flag:"🇪🇹",name:"Injera & Lentil Stew",origin:"Ethiopia",tags:["lentils","fermented soy paste","onions","garlic","bell peppers","yeast cultures"],why:"Fermented injera feeds gut biome. Lentils = zero-waste protein.",pro:8,carb:7,fat:2,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇪🇹",name:"Tibs Fitfit",origin:"Ethiopia",tags:["lab-grown chicken","fermented soy paste","onions","garlic","bell peppers","herbs"],why:"Protein-packed celebration dish. Community morale booster.",pro:9,carb:4,fat:5,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇬🇷",name:"Greek Quinoa Bowl",origin:"Greece",tags:["quinoa","hydroponic tomatoes","synthetic dairy","algae oil","hydroponic herbs"],why:"Complete protein from quinoa. Mediterranean longevity diet.",pro:7,carb:7,fat:6,vit:9,mealTypes:["breakfast","lunch"]},
+  {flag:"🇵🇪",name:"Quinoa Stew",origin:"Peru",tags:["quinoa","soybeans","sweet potatoes","onions","garlic","seeds"],why:"Andean superfood combo. Excellent for high-demand crew.",pro:8,carb:8,fat:4,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇵🇪",name:"Causa Rellena",origin:"Peru",tags:["hydroponic potatoes","lentils","algae oil","hydroponic lettuce","onions"],why:"Layered potato terrine. High-density carb for physical labour.",pro:6,carb:9,fat:4,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇳🇬",name:"Jollof Rice & Beans",origin:"Nigeria",tags:["rice cultures","soybeans","hydroponic tomatoes","onions","bell peppers"],why:"Culturally iconic across Africa. High morale from familiarity.",pro:7,carb:8,fat:3,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇳🇬",name:"Egusi Soup",origin:"Nigeria",tags:["seeds","soybeans","hydroponic greens","onions","mushrooms","algae oil"],why:"Melon seeds = extremely high fat and protein density.",pro:8,carb:4,fat:9,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇧🇷",name:"Feijão Tropeiro",origin:"Brazil",tags:["soybeans","rice cultures","synthetic egg protein","garlic","onions"],why:"Calorie-dense cowboy meal. Excellent for physical labour.",pro:8,carb:8,fat:4,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🇹🇭",name:"Green Curry",origin:"Thailand",tags:["mycoprotein fungi","algae milk","hydroponic vegetables","rice cultures","herbs"],why:"Anti-inflammatory spices. Flavour complexity lifts morale.",pro:6,carb:7,fat:7,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇹🇭",name:"Tom Yum Broth",origin:"Thailand",tags:["algae broth","mushrooms","lemongrass","hydroponic herbs","synthetic egg protein"],why:"Hydrating immunity broth. Lemongrass combats space fatigue.",pro:5,carb:3,fat:3,vit:10,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇺🇸",name:"Protein Power Bowl",origin:"USA",tags:["insect protein flour","sweet potatoes","seeds","kale","algae oil"],why:"Designed for max performance. High protein density per gram.",pro:9,carb:7,fat:6,vit:9,mealTypes:["breakfast","lunch"]},
+  {flag:"🇪🇸",name:"Vegetable Paella",origin:"Spain",tags:["rice cultures","bell peppers","onions","mushrooms","garlic","algae oil"],why:"Communal dish — crew social bonding meal.",pro:5,carb:9,fat:4,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇷",name:"Ash Reshteh",origin:"Iran",tags:["lentils","chickpeas","soybeans","algae noodles","onions","herbs","yeast cultures"],why:"Thick Persian herb noodle soup. Rich in plant iron and folate.",pro:8,carb:8,fat:2,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇬🇭",name:"Red Red",origin:"Ghana",tags:["soybeans","sweet potatoes","onions","bell peppers","algae oil","hydroponic tomatoes"],why:"Black-eyed bean stew. Essential B-vitamins for nerve health.",pro:8,carb:7,fat:4,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇵🇭",name:"Sinigang na Gulay",origin:"Philippines",tags:["hydroponic vegetables","soybeans","mushrooms","onions","algae broth","garlic"],why:"Sour tamarind broth. Vitamin C boosts immune function.",pro:6,carb:5,fat:3,vit:10,mealTypes:["lunch","dinner"]},
+  {flag:"🇹🇷",name:"Mercimek Çorbası",origin:"Turkey",tags:["lentils","onions","garlic","hydroponic tomatoes","algae oil","spices"],why:"Red lentil soup. Simple, low-waste, high-iron.",pro:8,carb:7,fat:3,vit:8,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇯🇲",name:"Ackee & Protein Hash",origin:"Jamaica",tags:["soybeans","hydroponic tomatoes","onions","bell peppers","algae oil","synthetic egg protein"],why:"Cultural staple reimagined. Unique Caribbean nutrient profile.",pro:7,carb:5,fat:7,vit:8,mealTypes:["breakfast","lunch"]},
+  {flag:"🇦🇷",name:"Locro Stew",origin:"Argentina",tags:["chickpeas","sweet potatoes","onions","garlic","bell peppers","seeds"],why:"Thick winter stew. Dense calories for extreme physical work.",pro:7,carb:8,fat:4,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇩",name:"Nasi Goreng",origin:"Indonesia",tags:["rice cultures","synthetic egg protein","soybeans","fermented soy paste","garlic","onions"],why:"Indonesia's comfort food. High morale, highly adaptable.",pro:7,carb:8,fat:5,vit:7,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇺🇦",name:"Borscht",origin:"Ukraine",tags:["hydroponic tomatoes","soybeans","onions","garlic","mushrooms","yeast cultures"],why:"Simulated beetroot base rich in nitrates. Boosts circulation.",pro:6,carb:6,fat:2,vit:10,mealTypes:["lunch","dinner"]},
+  {flag:"🇸🇳",name:"Thieboudienne Bowl",origin:"Senegal",tags:["rice cultures","cultured fish cells","hydroponic tomatoes","onions","bell peppers","algae oil"],why:"West Africa's favourite rice-fish dish. Rich in omega-3.",pro:8,carb:8,fat:5,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇵🇰",name:"Daal Chawal",origin:"Pakistan",tags:["lentils","rice cultures","onions","garlic","spices","yeast cultures"],why:"Complete protein combination. Cultural comfort across South Asia.",pro:8,carb:8,fat:2,vit:7,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇳🇵",name:"Dal Bhat",origin:"Nepal",tags:["lentils","rice cultures","spinach","garlic","onions","spices"],why:"Sherpa staple. High-altitude endurance food repurposed for space.",pro:8,carb:8,fat:2,vit:9,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇲🇾",name:"Nasi Lemak Bowl",origin:"Malaysia",tags:["rice cultures","algae milk","insect protein flour","seaweed sheets","seeds","onions"],why:"Aromatic coconut rice bowl. Cultural morale anchor for Southeast Asian crew.",pro:7,carb:8,fat:6,vit:7,mealTypes:["breakfast","lunch"]},
+  {flag:"🇰🇪",name:"Ugali & Sukuma Wiki",origin:"Kenya",tags:["sweet potatoes","kale","soybeans","onions","algae oil","garlic"],why:"East African staple. Kale = dense micronutrient source.",pro:7,carb:8,fat:3,vit:10,mealTypes:["lunch","dinner"]},
+  {flag:"🇿🇦",name:"Umngqusho",origin:"South Africa",tags:["soybeans","sweet potatoes","onions","garlic","bell peppers","seeds"],why:"Xhosa samp and beans dish. Complete plant protein pairing.",pro:8,carb:8,fat:3,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇷🇺",name:"Buckwheat Kasha",origin:"Russia",tags:["quinoa","mushrooms","onions","algae oil","yeast cultures","seeds"],why:"Buckwheat substitute. High magnesium for muscle recovery.",pro:6,carb:8,fat:4,vit:8,mealTypes:["breakfast","lunch"]},
+  {flag:"🇵🇱",name:"Żurek Soup",origin:"Poland",tags:["lentils","mycoprotein fungi","onions","garlic","yeast cultures","soybeans"],why:"Fermented rye soup adapted. Probiotic base for gut support.",pro:7,carb:6,fat:3,vit:8,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇦🇪",name:"Harees",origin:"UAE / Gulf",tags:["oats","lab-grown chicken","onions","garlic","algae oil","spices"],why:"Ancient wheat-meat porridge. High calorie density for demanding shifts.",pro:8,carb:8,fat:4,vit:6,mealTypes:["breakfast","dinner"]},
+  {flag:"🇲🇲",name:"Mohinga",origin:"Myanmar",tags:["algae noodles","cultured fish cells","lemongrass","onions","garlic","herbs"],why:"Myanmar's national breakfast. Warming fish noodle broth, immune support.",pro:7,carb:6,fat:4,vit:9,mealTypes:["breakfast","lunch"]},
+];
+
+const ING={
+  protein:["insect protein flour","spirulina algae","chlorella algae","soybeans","lentils","lab-grown chicken","synthetic egg protein","mycoprotein fungi","cultured fish cells","chickpeas"],
+  carbs:["quinoa","oats","rice cultures","sweet potatoes","hydroponic potatoes","algae noodles","lentils","chickpeas"],
+  fats:["algae oil","nuts","seeds","algae milk","synthetic dairy base"],
+  vitamins:["kale","spinach","seaweed sheets","bell peppers","hydroponic tomatoes","mushrooms","yeast cultures","electrolyte mineral mix","hydroponic lettuce","garlic","onions"],
+  hydration:["electrolyte mineral mix","algae broth","seaweed sheets"],
+  flavour:["fermented soy paste","garlic","onions","herbs","spices","lemongrass","yeast cultures"]
+};
+
+const METHODS=[
+  "Steam protein base · Roast root vegetables · Combine with mineral broth and seeds",
+  "Boil grain base · Pan-sear protein with aromatics · Finish with algae oil and vitamin greens",
+  "Simmer legumes with garlic and onions · Serve over grain · Top with omega-rich seeds",
+  "Stir-fry protein and vegetables over high heat · Add fermented paste · Serve over rice base",
+  "Blend protein and greens into a dense bowl · Drizzle with algae oil · Add grain crumble",
+  "Slow-cook legume and vegetable broth · Fortify with mineral mix · Pair with grain base",
+];
+
+function rand(a){return a[Math.floor(Math.random()*a.length)];}
+function pick(a,n){const c=[...a],o=[];for(let i=0;i<n&&c.length;i++){const x=Math.floor(Math.random()*c.length);o.push(c.splice(x,1)[0]);}return o;}
+
+function generatePrep(job,activeMeals){
+  return activeMeals.map(meal=>{
+    const proteins=pick(ING.protein,job.pro>=8?3:2);
+    const carbs=pick(ING.carbs,job.carb>=8?2:1);
+    const fats=pick(ING.fats,job.fat>=7?2:1);
+    const vitamins=pick(ING.vitamins,job.vit>=9?3:2);
+    const flavour=pick(ING.flavour,2);
+    const hydration=job.hyd>=8?pick(ING.hydration,1):[];
+    return{meal,proteins,carbs,fats,vitamins,flavour,hydration,method:rand(METHODS)};
+  });
+}
+
+let state={step:1,job:null,tier:null,meals:{breakfast:true,lunch:true,dinner:true},mode:null,selections:{breakfast:null,lunch:null,dinner:null},prepPlan:null};
+
+// ── Tier selection ───────────────────────────────────────────
+function selectTier(tier){
+  state.tier=tier;
+  state.job=null;
+  document.getElementById('nextBtn1').disabled=true;
+  // Highlight selected tier card
+  document.querySelectorAll('.tier-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelector('.tier-'+tier).classList.add('selected');
+  // Show job list
+  const tc=document.getElementById('tierContent');
+  tc.classList.add('visible');
+  // Update heading
+  const meta=TIER_META[tier];
+  document.getElementById('tierHeadingLabel').textContent=meta.label;
+  document.getElementById('tierHeadingLabel').className='tier-heading-label '+meta.cls;
+  document.getElementById('tierHeadingName').textContent=
+    tier==='high'?'Physical & Engineering':tier==='medium'?'Technical & Operational':'Scientific & Administrative';
+  document.getElementById('jobSearch').value='';
+  renderJobs('');
+  tc.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function clearTier(){
+  state.tier=null;state.job=null;
+  document.querySelectorAll('.tier-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('tierContent').classList.remove('visible');
+  document.getElementById('nextBtn1').disabled=true;
+}
+
+function renderJobs(filter){
+  const f=filter.toLowerCase();
+  const jobs=JOBS.filter(j=>jobTier(j.cal)===state.tier&&j.name.toLowerCase().includes(f));
+  document.getElementById('jobGrid').innerHTML=jobs.map(j=>`
+    <div class="job-card ${state.job===j.name?'selected':''}" onclick="selectJob('${j.name.replace(/'/g,"\\'")}')">
+      <div class="job-name">${j.name}</div>
+      <div class="job-rating">Demand: ${j.rating}</div>
+      <div class="job-stats">
+        <span class="stat-pill">PRO ${j.pro}</span>
+        <span class="stat-pill">CARB ${j.carb}</span>
+        <span class="stat-pill">FAT ${j.fat}</span>
+        <span class="stat-pill">VIT ${j.vit}</span>
+      </div>
+    </div>`).join('');
+}
+
+function filterJobs(v){if(state.tier)renderJobs(v);}
+function selectJob(name){state.job=name;renderJobs(document.getElementById('jobSearch').value);document.getElementById('nextBtn1').disabled=false;}
+
+function toggleMeal(meal){
+  const on=state.meals[meal];
+  if(on&&Object.values(state.meals).filter(Boolean).length<=1){document.getElementById('mealWarn').classList.add('visible');return;}
+  document.getElementById('mealWarn').classList.remove('visible');
+  state.meals[meal]=!on;
+  const t=document.getElementById('tog-'+meal);
+  t.classList.toggle('on',!on);
+  t.querySelector('.toggle-check').textContent=!on?'✓':'';
+}
+
+function selectMode(mode){
+  state.mode=mode;
+  document.getElementById('mode-recipe').classList.toggle('selected',mode==='recipe');
+  document.getElementById('mode-prep').classList.toggle('selected',mode==='prep');
+  document.getElementById('nextBtn3').disabled=false;
+}
+
+function handleModeNext(){
+  if(state.mode==='recipe'){goTo(4);}
+  else{
+    const job=JOBS.find(j=>j.name===state.job);
+    const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
+    state.prepPlan=generatePrep(job,active);
+    renderResults(job,active,'prep');
+    goTo(5,true);
+  }
+}
+
+function goBack(){goTo(state.mode==='recipe'?4:3);}
+
+function renderSec4(){
+  const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
+  state.selections={breakfast:null,lunch:null,dinner:null};
+  const countries=[...new Set(RECIPES.map(r=>r.origin))].sort();
+  let h=`<div class="country-filters"><button class="country-btn active" onclick="filterCountry(this,'all')">All</button>${countries.map(c=>`<button class="country-btn" onclick="filterCountry(this,'${c.replace(/'/g,"\\'")}' )">${c}</button>`).join('')}</div>`;
+  active.forEach(meal=>{
+    h+=`<div class="meal-slot-label">${meal.charAt(0).toUpperCase()+meal.slice(1)}</div><div class="recipe-grid" id="grid-${meal}">`;
+    RECIPES.filter(r=>r.mealTypes.includes(meal)).forEach(r=>{
+      h+=`<div class="recipe-card" id="rc-${meal}-${san(r.name)}" onclick="selRec('${meal}','${r.name.replace(/'/g,"\\'")}')">
+        <span class="recipe-flag">${r.flag}</span>
+        <div class="recipe-info"><div class="recipe-name">${r.name}</div><div class="recipe-origin">${r.origin}</div>
+        <div class="recipe-adapt">${r.tags.slice(0,3).map(t=>`<span class="adapt-tag">${t}</span>`).join('')}</div></div>
+      </div>`;
+    });
+    h+=`</div>`;
+  });
+  document.getElementById('sec4Content').innerHTML=h;
+  checkDone();
+}
+
+function san(s){return s.replace(/[^a-zA-Z0-9]/g,'_');}
+
+function selRec(meal,name){
+  state.selections[meal]=name;
+  const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
+  active.forEach(m=>{RECIPES.filter(r=>r.mealTypes.includes(m)).forEach(r=>{const el=document.getElementById(`rc-${m}-${san(r.name)}`);if(el)el.classList.toggle('selected',state.selections[m]===r.name);});});
+  checkDone();
+}
+
+function checkDone(){
+  const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
+  document.getElementById('nextBtn4').disabled=!active.every(m=>state.selections[m]!==null);
+}
+
+function filterCountry(btn,country){
+  document.querySelectorAll('.country-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
+  active.forEach(meal=>{
+    const g=document.getElementById('grid-'+meal);if(!g)return;
+    g.querySelectorAll('.recipe-card').forEach(card=>{
+      const o=card.querySelector('.recipe-origin').textContent;
+      card.style.display=(country==='all'||o===country||o.includes(country))?'':'none';
+    });
+  });
+}
+
+function buildRecipePlan(){
+  const job=JOBS.find(j=>j.name===state.job);
+  const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
+  renderResults(job,active,'recipe');
+  goTo(5,true);
+}
+
+function rerollPrep(){
+  const job=JOBS.find(j=>j.name===state.job);
+  const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
+  state.prepPlan=generatePrep(job,active);
+  renderResults(job,active,'prep');
+}
+
+function renderResults(job,activeMeals,mode){
+  const macroRows=[['Protein','pro','fill-protein'],['Carbohydrates','carb','fill-carbs'],['Healthy Fats','fat','fill-fats'],['Vitamins & Minerals','vit','fill-vitamins'],['Hydration','hyd','fill-protein'],['Calories','cal','fill-carbs']];
+  let meals='';
+  if(mode==='recipe'){
+    meals='<div class="meals-output">';
+    activeMeals.forEach(meal=>{
+      const r=RECIPES.find(x=>x.name===state.selections[meal]);if(!r)return;
+      meals+=`<div class="meal-result">
+        <div class="meal-result-header">
+          <span class="meal-time-badge ${meal}">${meal}</span>
+          <span class="meal-result-name">${r.flag} ${r.name}</span>
+          <span style="margin-left:auto;font-size:11px;color:var(--text3)">${r.origin}</span>
+        </div>
+        <div class="meal-result-body">
+          <div class="ingredient-list">${r.tags.map(t=>`<span class="ing-chip">${t}</span>`).join('')}</div>
+          <div class="meal-why"><span>★ Why this works</span>${r.why}</div>
+        </div>
+      </div>`;
+    });
+    meals+='</div>';
+  } else {
+    meals='<div class="meals-output">';
+    state.prepPlan.forEach(p=>{
+      const allIng=[
+        ...p.proteins.map(i=>({name:i,role:'Protein'})),
+        ...p.carbs.map(i=>({name:i,role:'Carbs'})),
+        ...p.fats.map(i=>({name:i,role:'Fats'})),
+        ...p.vitamins.map(i=>({name:i,role:'Vitamins'})),
+        ...p.flavour.map(i=>({name:i,role:'Flavour'})),
+        ...p.hydration.map(i=>({name:i,role:'Hydration'})),
+      ];
+      meals+=`<div class="prep-result-card">
+        <div class="prep-result-header">
+          <span class="meal-time-badge ${p.meal}">${p.meal}</span>
+          <span class="prep-auto-label">Auto-Generated</span>
+          <span class="meal-result-name" style="margin-left:8px">Optimised Nutrition Prep</span>
+        </div>
+        <div class="prep-body">
+          <div class="prep-section">
+            <div class="prep-section-title">Ingredients</div>
+            ${allIng.map(i=>`<div class="prep-ing-row"><div class="prep-ing-name">${i.name}</div><div class="prep-ing-role">${i.role}</div></div>`).join('')}
+          </div>
+          <div class="prep-instructions"><b>How to prepare:</b> ${p.method}</div>
+          <div class="macro-strip">
+            ${macroRows.slice(0,4).map(([label,key,cls])=>`
+              <div class="macro-item">
+                <div class="macro-item-label">${label}</div>
+                <div class="macro-item-bar"><div class="macro-item-fill ${cls}" style="width:${job[key]*10}%"></div></div>
+                <div class="macro-item-val">${job[key]}/10</div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+    });
+    meals+='</div><button class="reroll-btn" onclick="rerollPrep()">↻ Regenerate ingredients</button>';
+  }
+  document.getElementById('resultContent').innerHTML=`
+    <div class="result-hero">
+      <div class="result-job">Shipboard Role</div>
+      <div class="result-headline">${job.name}</div>
+      <div class="result-sub">Nutrition demand: ${job.rating} · ${activeMeals.length} meal${activeMeals.length>1?'s':''} · ${mode==='recipe'?'Legacy Earth Recipes':'Auto-generated Meal Prep'}</div>
+      <div class="nutrition-radar">
+        ${macroRows.map(([label,key,cls])=>`
+          <div class="radar-item">
+            <div class="radar-label">${label}</div>
+            <div class="radar-bar"><div class="radar-fill ${cls}" style="width:${job[key]*10}%"></div></div>
+            <div class="radar-val">${job[key]}/10 demand</div>
+          </div>`).join('')}
+      </div>
+    </div>
+    ${meals}`;
+}
+
+function goTo(step,skipRender){
+  if(step===4&&!skipRender)renderSec4();
+  // Reset tier UI when going back to step 1
+  if(step===1){clearTier();}
+  for(let i=1;i<=5;i++){
+    document.getElementById('sec'+i).classList.toggle('visible',i===step);
+    const s=document.getElementById('step'+i);
+    s.classList.toggle('active',i===step);
+    s.classList.toggle('done',i<step);
+  }
+  state.step=step;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
