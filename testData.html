@@ -1,76 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Food Stock Tracker</title>
+    <title>Live Stock Manager</title>
     <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            line-height: 1.6;
+        body { font-family: sans-serif; padding: 20px; background: #fafafa; }
+        .food-item { 
+            background: white; margin: 10px 0; padding: 15px; 
+            border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .food-item {
-            background: #f4f4f4;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-left: 5px solid #2ecc71;
-            border-radius: 4px;
-        }
-        h1 { color: #333; }
+        .btn-group { display: flex; gap: 10px; }
+        button { cursor: pointer; border: none; border-radius: 4px; padding: 8px 12px; }
+        .plus { background: #2ecc71; color: white; }
+        .minus { background: #e74c3c; color: white; }
+        .refresh { background: #3498db; color: white; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <h1>Menu Stock</h1>
-    <div id="food-container">Loading data...</div>
+    <h1>Live Stock Inventory</h1>
+    <button class="refresh" onclick="loadData()">Refresh List</button>
+    <div id="food-container">Loading...</div>
 
     <script>
-        // IMPORTANT: Change this to your "Published as CSV" URL
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/12rAnFoHSJT4LALMViu6JvtZjGFMbR-o4u2EZ53gWeng/gviz/tq?tqx=out:csv';
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAaI-jNgHTQwfnVgHlYrwbQ3ic1DVIpRKWB7H1f3jFbac3HtqG56FfvJF9EdOkm07wn0XG25XvK45m/pub?output=csv';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuPPX5kU97FxfAA7FwpBc-EUjixvC823LjEOSmyc_JvtRxgd5aoufuQ_ZP0CJ21OJq/exec'; // PASTE NEW URL HERE
 
-        async function getFoods() {
+        const clean = (val) => val ? val.replace(/"/g, '').trim() : '';
+
+        async function loadData() {
+            const container = document.getElementById('food-container');
             try {
-                const response = await fetch(SHEET_URL);
+                const response = await fetch(CSV_URL);
                 const csvText = await response.text();
-                
                 const rows = csvText.trim().split('\n');
-                // slice(1) removes the header row
+                
                 const foods = rows.slice(1).map(row => {
-                    // This regex handles commas inside quotes if your sheet has them
                     const values = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     return {
-                        id: values[0]?.replace(/"/g, ''),
-                        name: values[1]?.replace(/"/g, ''),
-                        calories: parseInt(values[2]),
-                        stock: parseInt(values[3])
+                        name: clean(values[1]),
+                        calories: clean(values[2]),
+                        stock: clean(values[3])
                     };
                 });
-                
-                return foods;
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                document.getElementById('food-container').innerText = "Failed to load data.";
+
+                container.innerHTML = ''; 
+                foods.forEach(food => {
+                    if(!food.name) return; // Skip empty rows
+                    container.innerHTML += `
+                        <div class="food-item">
+                            <div>
+                                <strong>${food.name}</strong><br>
+                                <small>${food.calories} cal | Stock: ${food.stock}g</small>
+                            </div>
+                            <div class="btn-group">
+                                <button class="minus" onclick="changeStock('${food.name}', -100)">-100g</button>
+                                <button class="plus" onclick="changeStock('${food.name}', 100)">+100g</button>
+                            </div>
+                        </div>`;
+                });
+            } catch (e) { container.innerText = "Error loading data."; }
+        }
+
+        async function changeStock(foodName, amount) {
+            // Optimistic UI: Update the button text immediately so user knows it's working
+            console.log(`Requesting ${amount} for ${foodName}`);
+            
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        action: "updateStock",
+                        name: foodName,
+                        amount: amount
+                    })
+                });
+
+                // Wait 1 second for Google to process, then refresh the list
+                setTimeout(loadData, 1500);
+            } catch (e) {
+                alert("Failed to update stock.");
             }
         }
 
-        getFoods().then(foods => { 
-            const container = document.getElementById('food-container');
-            container.innerHTML = ''; // Clear the loading message
-
-            if (foods) {
-                foods.forEach(food => {
-                    container.innerHTML += `
-                        <div class="food-item">
-                            <strong>${food.name}</strong><br>
-                            ${food.calories} calories | Stock: ${food.stock}
-                        </div>
-                    `;
-                });
-            }
-        });
+        // Initial load
+        loadData();
     </script>
 </body>
 </html>
