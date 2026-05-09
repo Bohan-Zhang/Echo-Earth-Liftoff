@@ -2,7 +2,7 @@
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/12rAnFoHSJT4LALMViu6JvtZjGFMbR-o4u2EZ53gWeng/edit?usp=sharing';
 
 async function getFoods() {
-    const response = await fetch(SHEET_URL);
+    const response = await fetch(SHEET_URL); // Returns a response
     const csvText = await response.text();
     
     // Parse CSV to array of objects

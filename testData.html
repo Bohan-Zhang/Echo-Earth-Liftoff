@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Food Stock Tracker</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .food-item {
+            background: #f4f4f4;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-left: 5px solid #2ecc71;
+            border-radius: 4px;
+        }
+        h1 { color: #333; }
+    </style>
+</head>
+<body>
+
+    <h1>Menu Stock</h1>
+    <div id="food-container">Loading data...</div>
+
+    <script>
+        // IMPORTANT: Change this to your "Published as CSV" URL
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/12rAnFoHSJT4LALMViu6JvtZjGFMbR-o4u2EZ53gWeng/gviz/tq?tqx=out:csv';
+
+        async function getFoods() {
+            try {
+                const response = await fetch(SHEET_URL);
+                const csvText = await response.text();
+                
+                const rows = csvText.trim().split('\n');
+                // slice(1) removes the header row
+                const foods = rows.slice(1).map(row => {
+                    // This regex handles commas inside quotes if your sheet has them
+                    const values = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    return {
+                        id: values[0]?.replace(/"/g, ''),
+                        name: values[1]?.replace(/"/g, ''),
+                        calories: parseInt(values[2]),
+                        stock: parseInt(values[3])
+                    };
+                });
+                
+                return foods;
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                document.getElementById('food-container').innerText = "Failed to load data.";
+            }
+        }
+
+        getFoods().then(foods => { 
+            const container = document.getElementById('food-container');
+            container.innerHTML = ''; // Clear the loading message
+
+            if (foods) {
+                foods.forEach(food => {
+                    container.innerHTML += `
+                        <div class="food-item">
+                            <strong>${food.name}</strong><br>
+                            ${food.calories} calories | Stock: ${food.stock}
+                        </div>
+                    `;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
