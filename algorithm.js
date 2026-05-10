@@ -1,7 +1,5 @@
 
-// ═══════════════════════════════════════════════════════════════════
 // INVENTORY FETCH
-// ═══════════════════════════════════════════════════════════════════
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAaI-jNgHTQwfnVgHlYrwbQ3ic1DVIpRKWB7H1f3jFbac3HtqG56FfvJF9EdOkm07wn0XG25XvK45m/pub?output=csv';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuPPX5kU97FxfAA7FwpBc-EUjixvC823LjEOSmyc_JvtRxgd5aoufuQ_ZP0CJ21OJq/exec';
 
@@ -19,29 +17,23 @@ let state = {
   inventoryLoaded: false 
 };
 
-// Utility function to clean CSV values by removing quotes and whitespace
-const cleanVal = v => v ? v.replace(/"/g,'').trim() : ''; 
+const cleanVal = v => v ? v.replace(/"/g,'').trim() : ''; // 
 
-// Fetch food inventory from Google Sheet CSV
-// Parses CSV data and filters for valid food items with sufficient stock
 async function fetchFoodInventory() { 
-  setInvStatus('loading', 'Fetching inventory…');  // Show loading status 
+  setInvStatus('loading', 'Fetching inventory…'); // 
   try {
-    const res  = await fetch(CSV_URL);                                 // Fetch CSV from spreadsheet
-    const text = await res.text();                                     // Convert to text
-    const rows = text.trim().split('\n');                             // Split into rows
+    const res  = await fetch(CSV_URL);
+    const text = await res.text();
+    const rows = text.trim().split('\n');
 
-    // Parse CSV rows into food objects, extracting name, calories per 100g, and stock in grams
-    state.foodInventory = rows.slice(1)                               // Skip header row
-      .map(row => {
-        const vals = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)$/);  // Safely split CSV preserving quoted values
-        return {
-          name:     cleanVal(vals[1]),                               // Food name (column 2)
-          calories: parseFloat(cleanVal(vals[2])) || 0,             // Calories per 100g (column 3)
-          stock:    parseFloat(cleanVal(vals[3])) || 0              // Stock in grams (column 4)
-        };
-      })
-      .filter(f => f.name && f.calories > 0 && f.stock > 50);        // Keep only valid foods with >50g stock
+    state.foodInventory = rows.slice(1).map(row => {
+      const vals = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+      return {
+        name:     cleanVal(vals[1]),
+        calories: parseFloat(cleanVal(vals[2])) || 0,
+        stock:    parseFloat(cleanVal(vals[3])) || 0
+      };
+    }).filter(f => f.name && f.calories > 0 && f.stock > 50);
 
     state.inventoryLoaded = true;
     setInvStatus('live', `${state.foodInventory.length} items in stock`);
@@ -51,79 +43,63 @@ async function fetchFoodInventory() {
   }
 }
 
-// Update the inventory status indicator in the UI
-// Shows loading/live/error state and descriptive text
 function setInvStatus(status, text) {
   const dot = document.getElementById('invDot');
-  document.getElementById('invText').textContent = text;               // Update status text
+  document.getElementById('invText').textContent = text;
   dot.className = 'inv-dot';
-  if (status === 'live')    { dot.classList.add('live'); }           // Green indicator
-  if (status === 'loading') { dot.classList.add('loading'); }        // Loading spinner
+  if (status === 'live')    { dot.classList.add('live'); }
+  if (status === 'loading') { dot.classList.add('loading'); }
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // CALORIE OPTIMISER
-// ═══════════════════════════════════════════════════════════════════
-// Select foods for a meal based on calorie target
-// Uses random selection with constraints to create varied, realistic meal portions
 function selectFoodsForMeal(pool, targetCals) {
-  const foods    = [...pool].sort(() => Math.random() - 0.5);        // Randomize food order
+  const foods    = [...pool].sort(() => Math.random() - 0.5);
   const selected = [];
   let   total    = 0;
 
-  // Iterate through randomized food pool and add foods until target reached
   for (const food of foods) {
     const remaining = targetCals - total;
-    if (remaining < 40) break;                                        // Stop if nearly at target
+    if (remaining < 40) break;
 
-    // Calculate portion: max 40% of target per food to ensure variety
     const maxContrib = Math.min(remaining, targetCals * 0.40);
     const gNeeded    = Math.round((maxContrib / food.calories) * 100);
-    const gUsed      = Math.min(gNeeded, food.stock, 350);            // Cap at 350g per food, limited by stock
-    if (gUsed < 30) continue;                                          // Skip if portion too small
+    const gUsed      = Math.min(gNeeded, food.stock, 350);
+    if (gUsed < 30) continue;
 
     const cals = Math.round((gUsed * food.calories) / 100);
-    if (cals < 30) continue;                                          // Skip if calories too low
+    if (cals < 30) continue;
 
-    // Add food to selected list with portion info
     selected.push({ name: food.name, gramsUsed: gUsed, cals, caloriesPer100g: food.calories });
     total += cals;
-    if (total >= targetCals * 0.93) break;                             // Stop if >93% of target reached
+    if (total >= targetCals * 0.93) break;
   }
   return { foods: selected, totalCals: total };
 }
 
-// Generate a meal prep plan for active meals based on job and inventory
-// Returns array of meals with optimized food selections and preparation methods
 function generatePrep(job, activeMeals) {
-  // Handle case where inventory is empty
   if (!state.foodInventory.length) {
     return activeMeals.map(meal => ({
-      meal, foods:[],totalCals:0,
+      meal, foods:[], totalCals:0,
       targetCals: Math.round(job.dailyCalories * (MEAL_RATIOS[meal] || 0.33)),
-      method: 'Not enough food is available to meet calorie target'
+      method: 'No foods in stock. Please restock inventory.'
     }));
   }
-  
-  // Generate optimized meal plan for each active meal
   return activeMeals.map(meal => {
-    const ratio      = MEAL_RATIOS[meal] || (1 / activeMeals.length);  // Get meal calorie ratio
-    const targetCals = Math.round(job.dailyCalories * ratio);           // Calculate target calories for meal
-    const { foods, totalCals } = selectFoodsForMeal(state.foodInventory, targetCals); // Select foods
-    const method = METHODS[Math.floor(Math.random() * METHODS.length)];  // Pick random prep method
+    const ratio      = MEAL_RATIOS[meal] || (1 / activeMeals.length);
+    const targetCals = Math.round(job.dailyCalories * ratio);
+    const { foods, totalCals } = selectFoodsForMeal(state.foodInventory, targetCals);
+    const method = METHODS[Math.floor(Math.random() * METHODS.length)];
     return { meal, foods, totalCals, targetCals, method };
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════
+
 // JOB GRID
-// ═══════════════════════════════════════════════════════════════════
-// Render job cards in the UI with filtering
-// Shows job name, calorie requirements, activity level, and description
+
 function renderJobs(filter = '') {
   const f = filter.toLowerCase();
   document.getElementById('jobGrid').innerHTML = JOBS
-    .filter(j => j.name.toLowerCase().includes(f))                   // Filter by search term
+    .filter(j => j.name.toLowerCase().includes(f))
     .map(j => `
       <div class="job-card ${state.job === j.name ? 'selected' : ''}"
            onclick="selectJob('${j.name.replace(/'/g,"\\'")}')">
@@ -136,89 +112,67 @@ function renderJobs(filter = '') {
       </div>`).join('');
 }
 
-// Filter jobs by search input value
 function filterJobs(v) { renderJobs(v); }
-
-// Handle job selection: update state and enable next button
 function selectJob(name) {
-  state.job = name;                                                   // Store selected job
-  renderJobs(document.getElementById('jobSearch').value);             // Re-render with highlight
-  document.getElementById('nextBtn1').disabled = false;               // Enable navigation
+  state.job = name;
+  renderJobs(document.getElementById('jobSearch').value);
+  document.getElementById('nextBtn1').disabled = false;
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // MEAL TOGGLES
-// ═══════════════════════════════════════════════════════════════════
-// Toggle meal on/off - prevents user from disabling all meals
 function toggleMeal(meal) {
   const on = state.meals[meal];
-  // Prevent disabling the last remaining meal
   if (on && Object.values(state.meals).filter(Boolean).length <= 1) {
-    document.getElementById('mealWarn').classList.add('visible');    // Show warning
-    return;
+    document.getElementById('mealWarn').classList.add('visible'); return;
   }
   document.getElementById('mealWarn').classList.remove('visible');
-  state.meals[meal] = !on;                                            // Toggle state
+  state.meals[meal] = !on;
   const t = document.getElementById('tog-' + meal);
-  t.classList.toggle('on', !on);                                     // Update toggle display
-  t.querySelector('.toggle-knob').textContent = !on ? '✓' : '';      // Show/hide checkmark
+  t.classList.toggle('on', !on);
+  t.querySelector('.toggle-knob').textContent = !on ? '✓' : '';
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // MODE SELECTION
-// ═══════════════════════════════════════════════════════════════════
-// Select planning mode: 'recipe' (user selects from Earth recipes) or 'prep' (inventory-optimized)
 function selectMode(mode) {
-  state.mode = mode;                                                  // Store selected mode
-  document.getElementById('mode-recipe').classList.toggle('selected', mode === 'recipe');  // Highlight selection
+  state.mode = mode;
+  document.getElementById('mode-recipe').classList.toggle('selected', mode === 'recipe');
   document.getElementById('mode-prep').classList.toggle('selected',   mode === 'prep');
-  document.getElementById('nextBtn3').disabled = false;               // Enable next button
+  document.getElementById('nextBtn3').disabled = false;
 }
 
-// Handle navigation after mode selection
-// Recipe mode: go to recipe selection (step 4)
-// Prep mode: fetch inventory if needed, generate plan, and show results (step 5)
 async function handleModeNext() {
   if (!state.mode) { alert('Please select a mode.'); return; }
   const job    = JOBS.find(j => j.name === state.job);
-  const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);  // Get active meals
+  const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
 
   if (state.mode === 'recipe') {
-    goTo(4);                                                           // Go to recipe selection
+    goTo(4);
   } else {
-    // Fetch inventory if not already loaded
     if (!state.inventoryLoaded) {
       const btn = document.getElementById('nextBtn3');
       btn.textContent = 'Loading stock…'; btn.disabled = true;
-      await fetchFoodInventory();                                    // Load food data from sheet
+      await fetchFoodInventory();
       btn.textContent = 'Continue →'; btn.disabled = false;
     }
-    state.prepPlan = generatePrep(job, active);                      // Generate optimized meal plan
-    renderResults(job, active, 'prep');                              // Render results
-    goTo(5, true);                                                   // Show results page
+    state.prepPlan = generatePrep(job, active);
+    renderResults(job, active, 'prep');
+    goTo(5, true);
   }
 }
 
-// Navigate back: go to recipe selection or mode selection based on current mode
 function goBack() { goTo(state.mode === 'recipe' ? 4 : 3); }
 
-// ═══════════════════════════════════════════════════════════════════
 // RECIPE BROWSER
-// ═══════════════════════════════════════════════════════════════════
-// Render section 4: Recipe selection browser with country filters
-// Display available recipes grouped by meal type with filtering options
 function renderSec4() {
   const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
-  state.selections = { breakfast:null, lunch:null, dinner:null };    // Reset previous selections
-  const countries = [...new Set(RECIPES.map(r => r.origin))].sort(); // Extract and sort unique countries
+  state.selections = { breakfast:null, lunch:null, dinner:null };
+  const countries = [...new Set(RECIPES.map(r => r.origin))].sort();
 
-  // Build country filter buttons
   let h = `<div class="country-filters">
     <button class="country-btn active" onclick="filterCountry(this,'all')">All</button>
     ${countries.map(c => `<button class="country-btn" onclick="filterCountry(this,'${c.replace(/'/g,"\\'")}')"> ${c}</button>`).join('')}
   </div>`;
 
-  // Build recipe grid for each active meal
   active.forEach(meal => {
     h += `<div class="meal-slot-label">${meal.charAt(0).toUpperCase()+meal.slice(1)}</div>
           <div class="recipe-grid" id="grid-${meal}">`;
@@ -238,15 +192,11 @@ function renderSec4() {
   checkDone();
 }
 
-// Sanitize strings for use as HTML IDs (replace non-alphanumeric characters with underscore)
 const san = s => s.replace(/[^a-zA-Z0-9]/g,'_');
 
-// Handle recipe selection for a meal
-// Update visual selection state and check if all meals have recipes selected
 function selRec(meal, name) {
-  state.selections[meal] = name;                                    // Store recipe selection
+  state.selections[meal] = name;
   const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
-  // Update visual highlights for all recipe cards
   active.forEach(m => {
     RECIPES.filter(r => r.mealTypes.includes(m)).forEach(r => {
       const el = document.getElementById(`rc-${m}-${san(r.name)}`);
@@ -256,19 +206,15 @@ function selRec(meal, name) {
   checkDone();
 }
 
-// Check if user has selected recipes for all active meals
-// Enables next button only when all meals have recipes selected
 function checkDone() {
   const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
   document.getElementById('nextBtn4').disabled = !active.every(m => state.selections[m] !== null);
 }
 
-// Filter recipe display by country of origin
 function filterCountry(btn, country) {
   document.querySelectorAll('.country-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');                                      // Highlight active filter button
+  btn.classList.add('active');
   const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
-  // Show/hide recipe cards based on country filter
   active.forEach(meal => {
     const g = document.getElementById('grid-'+meal); if (!g) return;
     g.querySelectorAll('.recipe-card').forEach(card => {
@@ -278,34 +224,25 @@ function filterCountry(btn, country) {
   });
 }
 
-// Build and display the final recipe plan from user selections
 function buildRecipePlan() {
   const job    = JOBS.find(j => j.name === state.job);
   const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
-  renderResults(job, active, 'recipe');                             // Show recipe plan
-  goTo(5, true);                                                    // Go to results
+  renderResults(job, active, 'recipe');
+  goTo(5, true);
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // REROLL
-// ═══════════════════════════════════════════════════════════════════
-// Regenerate prep plan with different random food selections
-// Allows user to get alternative meal combinations without changing settings
 function rerollPrep() {
   const job    = JOBS.find(j => j.name === state.job);
   const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
-  state.prepPlan = generatePrep(job, active);                       // Generate new plan
-  renderResults(job, active, 'prep');                               // Update display
+  state.prepPlan = generatePrep(job, active);
+  renderResults(job, active, 'prep');
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // CALORIE BAR HELPER
-// ═══════════════════════════════════════════════════════════════════
-// Generate HTML for calorie progress bar
-// Color-coded: green (90%+), yellow (65-89%), red (<65% of target)
+
 function calBar(got, target) {
   const pct   = Math.min(Math.round((got / target) * 100), 100);
-  // Determine bar color based on achievement percentage
   const color = pct >= 90 ? 'var(--green)' : pct >= 65 ? 'var(--warn)' : 'var(--red)';
   return `<div class="cal-bar-wrap">
     <div class="cal-bar-track"><div class="cal-bar-fill" style="width:${pct}%;background:${color}"></div></div>
@@ -313,15 +250,11 @@ function calBar(got, target) {
   </div>`;
 }
 
-// ═══════════════════════════════════════════════════════════════════
+
 // RENDER RESULTS
-// ═══════════════════════════════════════════════════════════════════
-// Render final meal plan results
-// Supports two modes: 'recipe' (user-selected recipes) and 'prep' (inventory-optimized)
 function renderResults(job, activeMeals, mode) {
   let mealsHTML = '';
 
-  // Render recipe mode: show selected recipes with descriptions and ingredients
   if (mode === 'recipe') {
     mealsHTML = '<div class="meals-output">';
     activeMeals.forEach(meal => {
@@ -342,13 +275,10 @@ function renderResults(job, activeMeals, mode) {
     mealsHTML += '</div>';
 
   } else {
-    // Render prep mode: show detailed ingredients, portions, and preparation instructions
-    const totalAchieved = state.prepPlan.reduce((s,p) => s + p.totalCals, 0);  // Calculate total calories
+    const totalAchieved = state.prepPlan.reduce((s,p) => s + p.totalCals, 0);
     mealsHTML = '<div class="meals-output">';
 
-    // Build HTML for each meal in the prep plan
     state.prepPlan.forEach(p => {
-      // Create ingredient rows or show empty state if no foods available
       const rows = p.foods.length
         ? p.foods.map(f => `
             <div class="prep-ing-row">
@@ -356,9 +286,8 @@ function renderResults(job, activeMeals, mode) {
               <div class="prep-ing-portion">${f.gramsUsed} g</div>
               <div class="prep-ing-cals">${f.cals.toLocaleString()} kcal</div>
             </div>`).join('')
-        : `<div class="prep-no-foods"> Not enough food is available for this meal.</div>`;
+        : `<div class="prep-no-foods">⚠ No foods in stock. Please restock the inventory.</div>`;
 
-      // Build meal card with ingredients, calorie bar, and prep instructions
       mealsHTML += `
         <div class="prep-result-card">
           <div class="prep-result-header">
@@ -377,7 +306,6 @@ function renderResults(job, activeMeals, mode) {
         </div>`;
     });
 
-    // Show daily summary with total calories and reroll button
     mealsHTML += `</div>
       <div class="daily-summary">
         <div class="daily-summary-title">Daily Calorie Total</div>
@@ -387,13 +315,11 @@ function renderResults(job, activeMeals, mode) {
       <button class="btn btn-reroll" onclick="rerollPrep()">↻ Regenerate meal plan</button>`;
   }
 
-  // Render complete results page with header and meal plan
   document.getElementById('resultContent').innerHTML = `
     <div class="result-hero">
       <div class="result-job">Shipboard Role</div>
       <div class="result-headline">${job.name}</div>
       <div class="result-sub">${job.activity} activity &nbsp;·&nbsp; ${job.dailyCalories.toLocaleString()} kcal/day target &nbsp;·&nbsp; ${activeMeals.length} meal${activeMeals.length>1?'s':''} &nbsp;·&nbsp; ${mode==='recipe'?'Legacy Earth Recipes':'Stock-Optimised Prep'}</div>
-      <!-- Display calorie breakdown by meal -->
       <div class="calorie-summary-strip">
         <div class="csb-item">
           <div class="csb-label">Daily Target</div>
@@ -409,27 +335,19 @@ function renderResults(job, activeMeals, mode) {
     ${mealsHTML}`;
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // NAVIGATION
-// ═══════════════════════════════════════════════════════════════════
-// Navigate to a specific step in the workflow (1-5)
-// Updates UI visibility, step indicators, and scrolls to top
 function goTo(step, skipRender) {
-  if (step === 4 && !skipRender) renderSec4();                       // Render recipes if navigating to step 4
-  // Show/hide sections and update step indicators
+  if (step === 4 && !skipRender) renderSec4();
   for (let i = 1; i <= 5; i++) {
     document.getElementById('sec'+i).classList.toggle('visible', i === step);
     const s = document.getElementById('step'+i);
-    s.classList.toggle('active', i === step);                       // Highlight current step
-    s.classList.toggle('done',   i < step);                         // Mark completed steps
+    s.classList.toggle('active', i === step);
+    s.classList.toggle('done',   i < step);
   }
   state.step = step;
-  window.scrollTo({ top: 0, behavior: 'smooth' });                  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════════════════
-// Initialize the application
-renderJobs();                                                         // Show job options on load
-fetchFoodInventory();                                                 // Pre-load inventory in background
+renderJobs();
+fetchFoodInventory();   // pre-load in background
