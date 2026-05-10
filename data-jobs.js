@@ -1,19 +1,19 @@
 const JOBS = [
-  { name: "EVA Engineer", type: "Physical", cal: 10 },
-  { name: "Construction Specialist", type: "Physical", cal: 10 },
-  { name: "Security Officer", type: "Security", cal: 9 },
+  { name: "EVA Engineer", type: "Physical", cal: 4500 },
+  { name: "Construction Specialist", type: "Physical", cal: 4500 },
+  { name: "Security Officer", type: "Security", cal: 3000 },
   
-  { name: "Technician", type: "Technical", cal: 8 },
-  { name: "Robotics Mechanic", type: "Technical", cal: 8 },
+  { name: "Technician", type: "Technical", cal: 2500 },
+  { name: "Robotics Mechanic", type: "Technical", cal: 2600 },
   
-  { name: "Medical Officer", type: "Cognitive", cal: 5 },
-  { name: "AI Systems Operator", type: "Cognitive", cal: 4 },
+  { name: "Medical Officer", type: "Cognitive", cal: 2500 },
+  { name: "AI Systems Operator", type: "Cognitive", cal: 2750 },
   
-  { name: "Pilot / Navigator", type: "Navigation", cal: 6 },
-  { name: "Hydroponics Farmer", type: "Navigation", cal: 7 },
+  { name: "Pilot / Navigator", type: "Navigation", cal: 3000 },
+  { name: "Hydroponics Farmer", type: "Navigation", cal: 3000 },
   
-  { name: "Chef / Nutrition Designer", type: "Social", cal: 6 },
-  { name: "Ship Teacher", type: "Social", cal: 4 }
+  { name: "Chef / Nutrition Designer", type: "Social", cal: 3500 },
+  { name: "Ship Teacher", type: "Social", cal: 4000 }
 ];
 
 const RECIPES=[
@@ -40,11 +40,11 @@ const RECIPES=[
   {flag:"🇮🇹",name:"Risotto ai Funghi",origin:"Italy",tags:["rice cultures","mycoprotein fungi","synthetic dairy","yeast cultures","onions","algae oil"],why:"Warming comfort food. Fungi = low-impact protein.",pro:6,carb:8,fat:6,vit:7,mealTypes:["dinner"]},
   {flag:"🇻🇳",name:"Pho",origin:"Vietnam",tags:["algae broth","rice cultures","hydroponic herbs","cultured beef strips"],why:"Hydrating and efficient.",pro:7,carb:7,fat:3,vit:9,mealTypes:["breakfast","lunch","dinner"]},
   {flag:"🇻🇳",name:"Bánh Mì Bowl",origin:"Vietnam",tags:["insect protein flour","fermented soy paste","hydroponic lettuce","rice cultures"],why:"Street-food efficiency. High morale from complex flavours.",pro:8,carb:7,fat:4,vit:7,mealTypes:["lunch"]},
-  {flag:"🌍",name:"Falafel Wraps",origin:"Middle East",tags:["chickpeas","algae flatbread","hydroponic lettuce","herbs","garlic"],why:"Cheap, sustainable protein source.",pro:8,carb:7,fat:4,vit:6,mealTypes:["lunch","dinner"]},
-  {flag:"🌍",name:"Shakshuka",origin:"North Africa",tags:["hydroponic tomatoes","synthetic egg protein","onions","garlic","bell peppers","spices"],why:"Iron-rich, anti-inflammatory. Excellent crew wellness food.",pro:7,carb:5,fat:5,vit:9,mealTypes:["breakfast","lunch"]},
-  {flag:"🌍",name:"Hummus & Flatbread",origin:"Middle East",tags:["chickpeas","algae oil","garlic","algae flatbread","seeds"],why:"High-fibre snack. Excellent calcium source.",pro:6,carb:7,fat:6,vit:6,mealTypes:["breakfast","lunch"]},
-  {flag:"🌍",name:"Tagine de Lentilles",origin:"Morocco",tags:["lentils","hydroponic tomatoes","onions","garlic","sweet potatoes","spices"],why:"North African spice blend fights inflammation. Dense nutrients.",pro:8,carb:8,fat:2,vit:9,mealTypes:["lunch","dinner"]},
-  {flag:"🌍",name:"Koshari",origin:"Egypt",tags:["rice cultures","lentils","chickpeas","onions","hydroponic tomatoes","garlic"],why:"Three complete proteins in one bowl.",pro:8,carb:9,fat:2,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"�🇹",name:"Falafel Wraps",origin:"Middle East",tags:["chickpeas","algae flatbread","hydroponic lettuce","herbs","garlic"],why:"Cheap, sustainable protein source.",pro:8,carb:7,fat:4,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🇪🇹",name:"Shakshuka",origin:"North Africa",tags:["hydroponic tomatoes","synthetic egg protein","onions","garlic","bell peppers","spices"],why:"Iron-rich, anti-inflammatory. Excellent crew wellness food.",pro:7,carb:5,fat:5,vit:9,mealTypes:["breakfast","lunch"]},
+  {flag:"�🇹",name:"Hummus & Flatbread",origin:"Middle East",tags:["chickpeas","algae oil","garlic","algae flatbread","seeds"],why:"High-fibre snack. Excellent calcium source.",pro:6,carb:7,fat:6,vit:6,mealTypes:["breakfast","lunch"]},
+  {flag:"🇲🇦",name:"Tagine de Lentilles",origin:"Morocco",tags:["lentils","hydroponic tomatoes","onions","garlic","sweet potatoes","spices"],why:"North African spice blend fights inflammation. Dense nutrients.",pro:8,carb:8,fat:2,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇪🇬",name:"Koshari",origin:"Egypt",tags:["rice cultures","lentils","chickpeas","onions","hydroponic tomatoes","garlic"],why:"Three complete proteins in one bowl.",pro:8,carb:9,fat:2,vit:7,mealTypes:["lunch","dinner"]},
   {flag:"🇨🇳",name:"Fried Rice",origin:"China",tags:["rice cultures","synthetic egg protein","hydroponic vegetables","fermented soy paste"],why:"Uses leftovers efficiently with minimal waste.",pro:6,carb:8,fat:4,vit:6,mealTypes:["breakfast","lunch","dinner"]},
   {flag:"🇨🇳",name:"Congee",origin:"China",tags:["rice cultures","seaweed sheets","fermented soy paste","mushrooms"],why:"Ultra light, restorative. Ideal for recovery days.",pro:4,carb:8,fat:1,vit:7,mealTypes:["breakfast"]},
   {flag:"🇨🇳",name:"Mapo Tofu",origin:"China",tags:["soybeans","mycoprotein fungi","fermented soy paste","onions","garlic","algae oil"],why:"Complete protein. Spiced oil aids circulation on long shifts.",pro:9,carb:3,fat:6,vit:7,mealTypes:["lunch","dinner"]},
