@@ -551,74 +551,105 @@ function renderResults(job, activeMeals, mode) {
 }
 
 // Make a meal: check inventory, deduct ingredients, and sync with server
+
 async function prepareMeal(recipeName) {
   const recipe = RECIPES.find(r => r.name === recipeName);
-  if (!recipe) {
-    alert('Recipe not found');
-    return;
-  }
+  if (!recipe) { alert('Recipe not found'); return; }
 
-  // Show loading state
   const btn = event.target;
   const originalText = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Making meal...';
 
   try {
-    // Make the meal
     const result = await makeMeal(recipe);
 
-    // Show result message
+    // Insert success/failure notification above the meals list
     const statusClass = result.success ? 'success' : 'error';
-    const resultHTML = `
+    const notification = document.createElement('div');
+    notification.innerHTML = `
       <div class="meal-result-notification ${statusClass}">
         <div class="notification-icon">${result.success ? '✓' : '✗'}</div>
         <div class="notification-message">${result.message}</div>
         ${result.ingredientsUsed ? `
           <div class="ingredients-deducted">
             <div class="deducted-title">Ingredients deducted:</div>
-            ${result.ingredientsUsed.map(ing => `<div class="deducted-item">• ${ing.ingredient}: -${ing.amount}g</div>`).join('')}
-          </div>
-        ` : ''}
-      </div>
-    `;
-
-    // Insert notification before the meals output
+            ${result.ingredientsUsed.map(i => `<div class="deducted-item">• ${i.ingredient}: -${i.amount}g</div>`).join('')}
+          </div>` : ''}
+      </div>`;
     const mealsOutput = document.querySelector('.meals-output');
-    if (mealsOutput) {
-      const notification = document.createElement('div');
-      notification.innerHTML = resultHTML;
-      mealsOutput.parentNode.insertBefore(notification.firstChild, mealsOutput);
-    }
+    if (mealsOutput) mealsOutput.parentNode.insertBefore(notification.firstChild, mealsOutput);
 
-    // Update button state
     if (result.success) {
+      // Lock this card's button as done
       btn.classList.add('completed');
       btn.textContent = '✓ Meal prepared';
       btn.disabled = true;
+
+      // ── RE-CHECK ALL OTHER UNPREPARED CARDS against the now-reduced inventory ──
+      const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
+      active.forEach(meal => {
+        const selectedName = state.selections[meal];
+        if (!selectedName || selectedName === recipeName) return; // skip the one just made
+
+        const r = RECIPES.find(x => x.name === selectedName);
+        if (!r) return;
+
+        // Find this meal's card elements
+        const card = document.querySelector(`.meal-result .meal-time-badge.${meal}`)?.closest('.meal-result');
+        if (!card) return;
+
+        const makeBtn = card.querySelector('.make-meal-btn');
+        if (!makeBtn || makeBtn.classList.contains('completed')) return; // already prepared, skip
+
+        // Re-run the availability check with updated inventory
+        const check = canMakeMeal(r);
+
+        // Update the status badge text + class
+        const badge = card.querySelector('.meal-status-badge');
+        if (badge) {
+          badge.className = `meal-status-badge ${check.canMake ? 'can-make' : 'cannot-make'}`;
+          badge.textContent = check.canMake ? '✓ Ready to prepare' : '✗ Insufficient ingredients';
+        }
+
+        // Update the card's own border class
+        card.className = `meal-result ${check.canMake ? 'can-make' : 'cannot-make'}`;
+
+        // Update the action button
+        if (check.canMake) {
+          makeBtn.disabled = false;
+          makeBtn.className = 'make-meal-btn';
+          makeBtn.textContent = 'Make Meal';
+          makeBtn.setAttribute('onclick', `prepareMeal('${r.name.replace(/'/g, "\\'")}')`);
+        } else {
+          makeBtn.disabled = true;
+          makeBtn.className = 'make-meal-btn disabled';
+          makeBtn.textContent = 'Cannot Make';
+
+          // Show or update the missing-ingredients box for this card
+          let missingBox = card.querySelector('.missing-ingredients-box');
+          if (!missingBox) {
+            missingBox = document.createElement('div');
+            missingBox.className = 'missing-ingredients-box';
+            card.querySelector('.ingredient-list')?.after(missingBox);
+          }
+          missingBox.innerHTML = check.missingIngredients
+            .map(m => `<div class="missing-ingredient">${m.ingredient}: need ${m.required}g, have ${m.available}g</div>`)
+            .join('');
+        }
+      });
+
     } else {
       btn.disabled = false;
       btn.textContent = originalText;
     }
+
   } catch (error) {
     console.error('Error preparing meal:', error);
     btn.disabled = false;
     btn.textContent = originalText;
     alert('Error preparing meal: ' + error.message);
   }
-}
-
-// NAVIGATION
-function goTo(step, skipRender) {
-  if (step === 4 && !skipRender) renderSec4();
-  for (let i = 1; i <= 5; i++) {
-    document.getElementById('sec'+i).classList.toggle('visible', i === step);
-    const s = document.getElementById('step'+i);
-    s.classList.toggle('active', i === step);
-    s.classList.toggle('done',   i < step);
-  }
-  state.step = step;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // INIT
