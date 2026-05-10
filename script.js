@@ -106,7 +106,7 @@ function renderJobs(filter = '') {
            onclick="selectJob('${j.name.replace(/'/g, "\\'")}')">
         <div class="job-name">${j.name}</div>
         <div class="job-stats">
-          <span class="stat-pill calories-pill">⚡ ${(j.dailyCalories ?? 0).toLocaleString()} kcal/day</span>
+          <span class="stat-pill calories-pill"> ${(j.dailyCalories ?? 0).toLocaleString()} kcal/day</span>
           <span class="stat-pill activity-pill">${j.activity}</span>
         </div>
         <div class="job-desc">${j.description}</div>
