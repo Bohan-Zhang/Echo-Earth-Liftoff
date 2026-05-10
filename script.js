@@ -604,7 +604,7 @@ function renderResults(job, activeMeals, mode) {
             <span class="meal-time-badge ${meal}">${meal}</span>
             <span class="meal-result-name">${r.flag} ${r.name}</span>
             <span class="meal-status-badge ${statusClass}">${statusIcon} ${statusText}</span>
-            <span style="margin-left:auto;font-size:11px;color:var(--text3)">${r.origin}</span>
+
           </div>
           <div class="meal-result-body">
             ${ingredientDetails}
