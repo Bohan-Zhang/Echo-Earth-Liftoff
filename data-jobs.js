@@ -18,7 +18,7 @@ const JOBS = [
  const RECIPES = [
 
   // ── BREAKFAST ──────────────────────────────────────────────────────────────
-
+// recipes with their required
   {
     flag: "🌿",
     name: "Spirulina Protein Bowl",
