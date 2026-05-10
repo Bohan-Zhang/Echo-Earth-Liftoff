@@ -375,5 +375,5 @@ function goTo(step, skipRender) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ─── INIT ──────────────────────────────────────────────────────────────────────
+//  INIT
 fetchFoodInventory();

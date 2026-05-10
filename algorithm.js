@@ -1,7 +1,5 @@
 
-// ═══════════════════════════════════════════════════════════════════
 // INVENTORY FETCH
-// ═══════════════════════════════════════════════════════════════════
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAaI-jNgHTQwfnVgHlYrwbQ3ic1DVIpRKWB7H1f3jFbac3HtqG56FfvJF9EdOkm07wn0XG25XvK45m/pub?output=csv';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuPPX5kU97FxfAA7FwpBc-EUjixvC823LjEOSmyc_JvtRxgd5aoufuQ_ZP0CJ21OJq/exec';
 
@@ -50,9 +48,7 @@ function setInvStatus(status, text) {
   if (status === 'loading') { dot.classList.add('loading'); }
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // CALORIE OPTIMISER
-// ═══════════════════════════════════════════════════════════════════
 function selectFoodsForMeal(pool, targetCals) {
   const foods    = [...pool].sort(() => Math.random() - 0.5);
   const selected = [];
@@ -94,9 +90,9 @@ function generatePrep(job, activeMeals) {
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════
+
 // JOB GRID
-// ═══════════════════════════════════════════════════════════════════
+
 function renderJobs(filter = '') {
   const f = filter.toLowerCase();
   document.getElementById('jobGrid').innerHTML = JOBS
@@ -120,9 +116,7 @@ function selectJob(name) {
   document.getElementById('nextBtn1').disabled = false;
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // MEAL TOGGLES
-// ═══════════════════════════════════════════════════════════════════
 function toggleMeal(meal) {
   const on = state.meals[meal];
   if (on && Object.values(state.meals).filter(Boolean).length <= 1) {
@@ -135,9 +129,7 @@ function toggleMeal(meal) {
   t.querySelector('.toggle-knob').textContent = !on ? '✓' : '';
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // MODE SELECTION
-// ═══════════════════════════════════════════════════════════════════
 function selectMode(mode) {
   state.mode = mode;
   document.getElementById('mode-recipe').classList.toggle('selected', mode === 'recipe');
@@ -167,9 +159,7 @@ async function handleModeNext() {
 
 function goBack() { goTo(state.mode === 'recipe' ? 4 : 3); }
 
-// ═══════════════════════════════════════════════════════════════════
 // RECIPE BROWSER
-// ═══════════════════════════════════════════════════════════════════
 function renderSec4() {
   const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
   state.selections = { breakfast:null, lunch:null, dinner:null };
@@ -238,9 +228,7 @@ function buildRecipePlan() {
   goTo(5, true);
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // REROLL
-// ═══════════════════════════════════════════════════════════════════
 function rerollPrep() {
   const job    = JOBS.find(j => j.name === state.job);
   const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
@@ -248,9 +236,8 @@ function rerollPrep() {
   renderResults(job, active, 'prep');
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // CALORIE BAR HELPER
-// ═══════════════════════════════════════════════════════════════════
+
 function calBar(got, target) {
   const pct   = Math.min(Math.round((got / target) * 100), 100);
   const color = pct >= 90 ? 'var(--green)' : pct >= 65 ? 'var(--warn)' : 'var(--red)';
@@ -260,9 +247,8 @@ function calBar(got, target) {
   </div>`;
 }
 
-// ═══════════════════════════════════════════════════════════════════
+
 // RENDER RESULTS
-// ═══════════════════════════════════════════════════════════════════
 function renderResults(job, activeMeals, mode) {
   let mealsHTML = '';
 
@@ -347,9 +333,7 @@ function renderResults(job, activeMeals, mode) {
     ${mealsHTML}`;
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // NAVIGATION
-// ═══════════════════════════════════════════════════════════════════
 function goTo(step, skipRender) {
   if (step === 4 && !skipRender) renderSec4();
   for (let i = 1; i <= 5; i++) {
@@ -362,8 +346,6 @@ function goTo(step, skipRender) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════════════════
 renderJobs();
 fetchFoodInventory();   // pre-load in background
