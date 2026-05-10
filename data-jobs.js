@@ -81,8 +81,6 @@ const RECIPES=[
   {flag:"🇦🇪",name:"Harees",origin:"UAE / Gulf",tags:["oats","lab-grown chicken","onions","garlic","algae oil","spices"],why:"Slow-cooked cracked wheat and chicken pounded to a smooth, porridge-like consistency and topped with ghee — an ancient Gulf dish eaten at Ramadan and celebrations.",pro:8,carb:8,fat:4,vit:6,mealTypes:["breakfast","dinner"]},
   {flag:"🇲🇲",name:"Mohinga",origin:"Myanmar",tags:["algae noodles","cultured fish cells","lemongrass","onions","garlic","herbs"],why:"Myanmar's national breakfast — a warming fish and lemongrass broth with rice noodles, crispy fritters, and fresh herbs, eaten street-side every morning.",pro:7,carb:6,fat:4,vit:9,mealTypes:["breakfast","lunch"]},
 ];
- 
-];
 
 const ING={
     protein: ["Soy Chunks", "Quorn", "Lentils"],
