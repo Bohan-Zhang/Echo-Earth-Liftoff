@@ -37,7 +37,7 @@ async function fetchFoodInventory() {
     }).filter(f => f.name !== ""); // Only keep rows with names
 
     console.log("Inventory synced with Google Sheets.");
-    return true; 
+    return true;
   } catch (e) {
     console.error("Sync failed:", e);
     return false;
