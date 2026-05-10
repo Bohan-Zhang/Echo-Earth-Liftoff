@@ -584,7 +584,7 @@ function renderResults(job, activeMeals, mode) {
       const checkResult = canMakeMeal(r);
       const canMake = checkResult.canMake;
       const statusClass = canMake ? 'can-make' : 'cannot-make';
-      const statusIcon = canMake ? '✓' : '✗';
+     
       const statusText = canMake ? 'Ready to prepare' : 'Insufficient ingredients';
       const totalCalories = checkResult.totalCalories;
       
