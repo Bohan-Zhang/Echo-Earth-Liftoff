@@ -13,6 +13,7 @@ let state = {
 const cleanVal = (val) => val ? val.replace(/"/g, '').trim() : '';
 
 async function fetchFoodInventory() {
+    
   try {
     const response = await fetch(CSV_URL);
     const csvText = await response.text();
@@ -311,9 +312,7 @@ function renderResults(job, activeMeals, mode) {
           <div class="prep-body">
             <div class="prep-section">
               <div class="prep-section-title">Ingredients &amp; Portions</div>
-              <div class="prep-ing-header">
-                <span>Food item</span><span>Grams</span><span>Calories</span>
-              </div>
+              
               ${foodRows}
             </div>
             ${calBar(p.totalCals, p.targetCals)}

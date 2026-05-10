@@ -5,21 +5,24 @@
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAaI-jNgHTQwfnVgHlYrwbQ3ic1DVIpRKWB7H1f3jFbac3HtqG56FfvJF9EdOkm07wn0XG25XvK45m/pub?output=csv';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuPPX5kU97FxfAA7FwpBc-EUjixvC823LjEOSmyc_JvtRxgd5aoufuQ_ZP0CJ21OJq/exec';
 
-let state = {
-  step: 1,
-  job: null,
-  meals: { breakfast: true, lunch: true, dinner: true },
-  mode: null,
-  selections: { breakfast: null, lunch: null, dinner: null },
-  prepPlan: null,
-  foodInventory: [],
-  inventoryLoaded: false
+
+// The state is the user's progression in the food selection.
+
+let state = { 
+  step: 1,  // Step is the step in the process. Step 1 is telling it your job.
+  job: null, // We don't know yet
+  meals: { breakfast: true, lunch: true, dinner: true }, // Are you eating breakfast?
+  mode: null, // Mode is if you're just eating for nutrients, or if you're doing a traditional recipe from Earth.
+  selections: { breakfast: null, lunch: null, dinner: null }, // What are we actually eating for break, lunch, dinner
+  prepPlan: null, // This is the recipe in case you are doing a traditional recipe.
+  foodInventory: [], // Includes food and the stock.
+  inventoryLoaded: false 
 };
 
-const cleanVal = v => v ? v.replace(/"/g,'').trim() : '';
+const cleanVal = v => v ? v.replace(/"/g,'').trim() : ''; // 
 
-async function fetchFoodInventory() {
-  setInvStatus('loading', 'Fetching inventory…');
+async function fetchFoodInventory() { 
+  setInvStatus('loading', 'Fetching inventory…'); // 
   try {
     const res  = await fetch(CSV_URL);
     const text = await res.text();
@@ -309,7 +312,6 @@ function renderResults(job, activeMeals, mode) {
           <div class="prep-body">
             <div class="prep-section">
               <div class="prep-section-title">Ingredients &amp; Portions</div>
-              <div class="prep-ing-header"><span>Food item</span><span>Grams</span><span>Calories</span></div>
               ${rows}
             </div>
             ${calBar(p.totalCals, p.targetCals)}

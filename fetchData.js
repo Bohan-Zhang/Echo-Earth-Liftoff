@@ -1,7 +1,7 @@
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAaI-jNgHTQwfnVgHlYrwbQ3ic1DVIpRKWB7H1f3jFbac3HtqG56FfvJF9EdOkm07wn0XG25XvK45m/pub?output=csv';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuPPX5kU97FxfAA7FwpBc-EUjixvC823LjEOSmyc_JvtRxgd5aoufuQ_ZP0CJ21OJq/exec';
 
-const clean = (val) => val ? val.replace(/"/g, '').trim() : '';
+const cleanVal = (val) => val ? val.replace(/"/g, '').trim() : '';
 
 async function loadData() {
     const container = document.getElementById('food-container');
@@ -13,9 +13,9 @@ async function loadData() {
         const foods = rows.slice(1).map(row => {
             const values = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
             return {
-                name: clean(values[1]),
-                calories: clean(values[2]),
-                stock: clean(values[3])
+                name: cleanVal(values[1]),
+                calories: cleanVal(values[2]),
+                stock: cleanVal(values[3])
             };
         });
 
