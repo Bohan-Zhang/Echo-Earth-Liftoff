@@ -1,220 +1,377 @@
-function rand(a){return a[Math.floor(Math.random()*a.length)];}
-function pick(a,n){const c=[...a],o=[];for(let i=0;i<n&&c.length;i++){const x=Math.floor(Math.random()*c.length);o.push(c.splice(x,1)[0]);}return o;}
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAaI-jNgHTQwfnVgHlYrwbQ3ic1DVIpRKWB7H1f3jFbac3HtqG56FfvJF9EdOkm07wn0XG25XvK45m/pub?output=csv';
+let state = {
+  step: 1,
+  job: null,
+  meals: { breakfast: true, lunch: true, dinner: true },
+  mode: null,
+  selections: { breakfast: null, lunch: null, dinner: null },
+  prepPlan: null,
+  foodInventory: []   // populated from live CSV on load
+};
 
-function generatePrep(job,activeMeals){
-  return activeMeals.map(meal=>{
-    const proteins=pick(ING.protein,job.pro>=8?3:2);
-    const carbs=pick(ING.carbs,job.carb>=8?2:1);
-    const fats=pick(ING.fats,job.fat>=7?2:1);
-    const vitamins=pick(ING.vitamins,job.vit>=9?3:2);
-    const flavour=pick(ING.flavour,2);
-    const hydration=job.hyd>=8?pick(ING.hydration,1):[];
-    return{meal,proteins,carbs,fats,vitamins,flavour,hydration,method:rand(METHODS)};
+const cleanVal = (val) => val ? val.replace(/"/g, '').trim() : '';
+
+async function fetchFoodInventory() {
+  try {
+    const response = await fetch(CSV_URL);
+    const csvText = await response.text();
+    const rows = csvText.trim().split('\n');
+
+    state.foodInventory = rows.slice(1)
+      .map(row => {
+        const values = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        const name     = cleanVal(values[1]);
+        const calories = parseFloat(cleanVal(values[2])) || 0; // kcal per 100 g
+        const stock    = parseFloat(cleanVal(values[3])) || 0; // grams in stock
+
+        return { name, calories, stock };
+      })
+      .filter(f => f.name && f.calories > 0 && f.stock > 50); // only usable items
+
+    console.log(`[Inventory] Loaded ${state.foodInventory.length} available foods.`);
+    return true;
+  } catch (e) {
+    console.error('[Inventory] Failed to fetch food data:', e);
+    return false;
+  }
+}
+
+function selectFoodsForMeal(availableFoods, targetCals) {
+  const pool = [...availableFoods].sort(() => Math.random() - 0.5);
+
+  const selected  = [];
+  let   totalCals = 0;
+
+  for (const food of pool) {
+    const remaining = targetCals - totalCals;
+    if (remaining < 40) break;                          // close enough
+
+    const maxContrib  = Math.min(remaining, targetCals * 0.40);
+    const gramsNeeded = Math.round((maxContrib / food.calories) * 100);
+    const gramsUsed   = Math.min(gramsNeeded, food.stock, 350); // cap at 350 g
+
+    if (gramsUsed < 30) continue;                        // too little to matter
+
+    const calsFromFood = Math.round((gramsUsed * food.calories) / 100);
+    if (calsFromFood < 30) continue;
+
+    selected.push({
+      name:            food.name,
+      gramsUsed,
+      cals:            calsFromFood,
+      caloriesPer100g: food.calories
+    });
+
+    totalCals += calsFromFood;
+    if (totalCals >= targetCals * 0.93) break;           // ≥ 93 % of target → done
+  }
+
+  return { foods: selected, totalCals };
+}
+
+function generatePrep(job, activeMeals) {
+  const inStock = state.foodInventory;   // already filtered for stock > 50 g
+
+  if (inStock.length === 0) {
+    return activeMeals.map(meal => ({
+      meal,
+      foods:     [],
+      totalCals: 0,
+      targetCals: Math.round(job.dailyCalories * (MEAL_RATIOS[meal] || 0.33)),
+      method:    'No foods currently in stock. Please restock inventory.'
+    }));
+  }
+
+  return activeMeals.map(meal => {
+    const ratio      = MEAL_RATIOS[meal] || (1 / activeMeals.length);
+    const targetCals = Math.round(job.dailyCalories * ratio);
+    const { foods, totalCals } = selectFoodsForMeal(inStock, targetCals);
+    const method = METHODS[Math.floor(Math.random() * METHODS.length)];
+
+    return { meal, foods, totalCals, targetCals, method };
   });
 }
 
-let state={step:1,job:null,meals:{breakfast:true,lunch:true,dinner:true},mode:null,selections:{breakfast:null,lunch:null,dinner:null},prepPlan:null};
-
-function renderJobs(filter=''){
-  const f=filter.toLowerCase();
-  document.getElementById('jobGrid').innerHTML=JOBS.filter(j=>j.name.toLowerCase().includes(f)).map(j=>`
-    <div class="job-card ${state.job===j.name?'selected':''}" onclick="selectJob('${j.name.replace(/'/g,"\\'")}')">
-      <div class="job-name">${j.name}</div>
-      <div class="job-stats">
-        <span class="stat-pill">CALORIES ${j.cal}</span>
-        
-      </div>
-    </div>`).join('');
+function renderJobs(filter = '') {
+  const f = filter.toLowerCase();
+  document.getElementById('jobGrid').innerHTML = JOBS
+    .filter(j => j.name.toLowerCase().includes(f))
+    .map(j => `
+      <div class="job-card ${state.job === j.name ? 'selected' : ''}"
+           onclick="selectJob('${j.name.replace(/'/g, "\\'")}')">
+        <div class="job-name">${j.name}</div>
+        <div class="job-stats">
+          <span class="stat-pill calories-pill">⚡ ${j.dailyCalories.toLocaleString()} kcal/day</span>
+          <span class="stat-pill activity-pill">${j.activity}</span>
+        </div>
+        <div class="job-desc">${j.description}</div>
+      </div>`)
+    .join('');
 }
 renderJobs();
 
-function filterJobs(v){renderJobs(v);}
-function selectJob(name){state.job=name;renderJobs(document.getElementById('jobSearch').value);document.getElementById('nextBtn1').disabled=false;}
+function filterJobs(v) { renderJobs(v); }
+function selectJob(name) {
+  state.job = name;
+  renderJobs(document.getElementById('jobSearch').value);
+  document.getElementById('nextBtn1').disabled = false;
+}
 
-function toggleMeal(meal){
-  const on=state.meals[meal];
-  if(on&&Object.values(state.meals).filter(Boolean).length<=1){document.getElementById('mealWarn').classList.add('visible');return;}
+function toggleMeal(meal) {
+  const on = state.meals[meal];
+  if (on && Object.values(state.meals).filter(Boolean).length <= 1) {
+    document.getElementById('mealWarn').classList.add('visible');
+    return;
+  }
   document.getElementById('mealWarn').classList.remove('visible');
-  state.meals[meal]=!on;
-  const t=document.getElementById('tog-'+meal);
-  t.classList.toggle('on',!on);
-  t.querySelector('.toggle-check').textContent=!on?'✓':'';
+  state.meals[meal] = !on;
+  const t = document.getElementById('tog-' + meal);
+  t.classList.toggle('on', !on);
+  t.querySelector('.toggle-check').textContent = !on ? '✓' : '';
 }
 
-function selectMode(mode){
+function selectMode(mode) {
   state.mode = mode;
-  
   const recipeEl = document.getElementById('mode-recipe');
-  const prepEl = document.getElementById('mode-prep');
-  const btnEl = document.getElementById('nextBtn3');
-
-  // Only toggle if the element was actually found
+  const prepEl   = document.getElementById('mode-prep');
+  const btnEl    = document.getElementById('nextBtn3');
   if (recipeEl) recipeEl.classList.toggle('selected', mode === 'recipe');
-  if (prepEl) prepEl.classList.toggle('selected', mode === 'prep');
-  if (btnEl) btnEl.disabled = false;
+  if (prepEl)   prepEl.classList.toggle('selected',   mode === 'prep');
+  if (btnEl)    btnEl.disabled = false;
 }
 
-function handleModeNext() { // When you press continue ->
-  console.log("Mode Next Clicked! Current Mode:", state.mode);
+async function handleModeNext() {
+  if (!state.mode) { alert("Please select a mode first!"); return; }
 
+  const job    = JOBS.find(j => j.name === state.job);
+  const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
 
-  console.log(Date.now());
-  if (state.mode === 'recipe') { 
-    goTo(4); 
-  } else if (state.mode === 'prep') {
-    const job = JOBS.find(j => j.name === state.job);
-    const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
-    
-    console.log("Generating prep for:", job.name);
+  if (state.mode === 'recipe') {
+    goTo(4);
+  } else {
+
+    if (state.foodInventory.length === 0) {
+      document.getElementById('nextBtn3').textContent = 'Loading inventory…';
+      await fetchFoodInventory();
+      document.getElementById('nextBtn3').textContent = 'Continue →';
+    }
     state.prepPlan = generatePrep(job, active);
     renderResults(job, active, 'prep');
     goTo(5, true);
-  } else {
-    alert("Please select a mode first!");
   }
 }
 
-function goBack(){goTo(state.mode==='recipe'?4:3);}
+function goBack() { goTo(state.mode === 'recipe' ? 4 : 3); }
 
-function renderSec4(){
-  const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
-  state.selections={breakfast:null,lunch:null,dinner:null};
-  const countries=[...new Set(RECIPES.map(r=>r.origin))].sort();
-  let h=`<div class="country-filters"><button class="country-btn active" onclick="filterCountry(this,'all')">All</button>${countries.map(c=>`<button class="country-btn" onclick="filterCountry(this,'${c.replace(/'/g,"\\'")}' )">${c}</button>`).join('')}</div>`;
-  active.forEach(meal=>{
-    h+=`<div class="meal-slot-label">${meal.charAt(0).toUpperCase()+meal.slice(1)}</div><div class="recipe-grid" id="grid-${meal}">`;
-    RECIPES.filter(r=>r.mealTypes.includes(meal)).forEach(r=>{
-      h+=`<div class="recipe-card" id="rc-${meal}-${san(r.name)}" onclick="selRec('${meal}','${r.name.replace(/'/g,"\\'")}')">
-        <span class="recipe-flag">${r.flag}</span>
-        <div class="recipe-info"><div class="recipe-name">${r.name}</div><div class="recipe-origin">${r.origin}</div>
-        <div class="recipe-adapt">${r.tags.slice(0,3).map(t=>`<span class="adapt-tag">${t}</span>`).join('')}</div></div>
-      </div>`;
+function renderSec4() {
+  const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
+  state.selections = { breakfast: null, lunch: null, dinner: null };
+  const countries = [...new Set(RECIPES.map(r => r.origin))].sort();
+
+  let h = `<div class="country-filters">
+    <button class="country-btn active" onclick="filterCountry(this,'all')">All</button>
+    ${countries.map(c => `<button class="country-btn" onclick="filterCountry(this,'${c.replace(/'/g, "\\'")}')"> ${c}</button>`).join('')}
+  </div>`;
+
+  active.forEach(meal => {
+    h += `<div class="meal-slot-label">${meal.charAt(0).toUpperCase() + meal.slice(1)}</div>
+          <div class="recipe-grid" id="grid-${meal}">`;
+    RECIPES.filter(r => r.mealTypes.includes(meal)).forEach(r => {
+      h += `<div class="recipe-card" id="rc-${meal}-${san(r.name)}"
+                 onclick="selRec('${meal}','${r.name.replace(/'/g, "\\'")}')">
+              <span class="recipe-flag">${r.flag}</span>
+              <div class="recipe-info">
+                <div class="recipe-name">${r.name}</div>
+                <div class="recipe-origin">${r.origin}</div>
+                <div class="recipe-adapt">${r.tags.slice(0, 3).map(t => `<span class="adapt-tag">${t}</span>`).join('')}</div>
+              </div>
+            </div>`;
     });
-    h+=`</div>`;
+    h += `</div>`;
   });
-  document.getElementById('sec4Content').innerHTML=h;
+
+  document.getElementById('sec4Content').innerHTML = h;
   checkDone();
 }
 
-function san(s){return s.replace(/[^a-zA-Z0-9]/g,'_');}
+function san(s) { return s.replace(/[^a-zA-Z0-9]/g, '_'); }
 
-function selRec(meal,name){
-  state.selections[meal]=name;
-  const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
-  active.forEach(m=>{RECIPES.filter(r=>r.mealTypes.includes(m)).forEach(r=>{const el=document.getElementById(`rc-${m}-${san(r.name)}`);if(el)el.classList.toggle('selected',state.selections[m]===r.name);});});
+function selRec(meal, name) {
+  state.selections[meal] = name;
+  const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
+  active.forEach(m => {
+    RECIPES.filter(r => r.mealTypes.includes(m)).forEach(r => {
+      const el = document.getElementById(`rc-${m}-${san(r.name)}`);
+      if (el) el.classList.toggle('selected', state.selections[m] === r.name);
+    });
+  });
   checkDone();
 }
 
-function checkDone(){
-  const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
-  document.getElementById('nextBtn4').disabled=!active.every(m=>state.selections[m]!==null);
+function checkDone() {
+  const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
+  document.getElementById('nextBtn4').disabled = !active.every(m => state.selections[m] !== null);
 }
 
-function filterCountry(btn,country){
-  document.querySelectorAll('.country-btn').forEach(b=>b.classList.remove('active'));
+function filterCountry(btn, country) {
+  document.querySelectorAll('.country-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
-  active.forEach(meal=>{
-    const g=document.getElementById('grid-'+meal);if(!g)return;
-    g.querySelectorAll('.recipe-card').forEach(card=>{
-      const o=card.querySelector('.recipe-origin').textContent;
-      card.style.display=(country==='all'||o===country||o.includes(country))?'':'none';
+  const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
+  active.forEach(meal => {
+    const g = document.getElementById('grid-' + meal);
+    if (!g) return;
+    g.querySelectorAll('.recipe-card').forEach(card => {
+      const o = card.querySelector('.recipe-origin').textContent;
+      card.style.display = (country === 'all' || o === country || o.includes(country)) ? '' : 'none';
     });
   });
 }
 
-function buildRecipePlan(){
-  const job=JOBS.find(j=>j.name===state.job);
-  const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
-  renderResults(job,active,'recipe');
-  goTo(5,true);
+function buildRecipePlan() {
+  const job    = JOBS.find(j => j.name === state.job);
+  const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
+  renderResults(job, active, 'recipe');
+  goTo(5, true);
 }
 
-function rerollPrep(){
-  const job=JOBS.find(j=>j.name===state.job);
-  const active=Object.entries(state.meals).filter(([,v])=>v).map(([k])=>k);
-  state.prepPlan=generatePrep(job,active);
-  renderResults(job,active,'prep');
+function rerollPrep() {
+  const job    = JOBS.find(j => j.name === state.job);
+  const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
+  state.prepPlan = generatePrep(job, active);
+  renderResults(job, active, 'prep');
 }
 
-function renderResults(job,activeMeals,mode){
-  const macroRows=[['Calories','cal','Come back soon']];
-  let meals='';
+function calBar(got, target) {
+  const pct   = Math.min(Math.round((got / target) * 100), 100);
+  const color = pct >= 90 ? 'var(--success, #22c55e)'
+              : pct >= 65 ? 'var(--warn, #f59e0b)'
+              :              'var(--danger, #ef4444)';
+  return `
+    <div class="cal-bar-wrap">
+      <div class="cal-bar-track">
+        <div class="cal-bar-fill" style="width:${pct}%;background:${color}"></div>
+      </div>
+      <span class="cal-bar-label">${got.toLocaleString()} / ${target.toLocaleString()} kcal (${pct}%)</span>
+    </div>`;
+}
 
-  if(mode==='recipe'){
-    meals='<div class="meals-output">';
-    activeMeals.forEach(meal=>{
-      const r=RECIPES.find(x=>x.name===state.selections[meal]);if(!r)return;
-      meals+=`<div class="meal-result">
-        <div class="meal-result-header">
-          <span class="meal-time-badge ${meal}">${meal}</span>
-          <span class="meal-result-name">${r.flag} ${r.name}</span>
-          <span style="margin-left:auto;font-size:11px;color:var(--text3)">${r.origin}</span>
-        </div>
-        <div class="meal-result-body">
-          <div class="ingredient-list">${r.tags.map(t=>`<span class="ing-chip">${t}</span>`).join('')}</div>
-          <div class="meal-why"><span>★ Why this works</span>${r.why}</div>
-        </div>
-      </div>`;
+function renderResults(job, activeMeals, mode) {
+  const totalDailyTarget = job.dailyCalories;
+  let mealsHTML = '';
+
+  if (mode === 'recipe') {
+    mealsHTML = '<div class="meals-output">';
+    activeMeals.forEach(meal => {
+      const r = RECIPES.find(x => x.name === state.selections[meal]);
+      if (!r) return;
+      mealsHTML += `
+        <div class="meal-result">
+          <div class="meal-result-header">
+            <span class="meal-time-badge ${meal}">${meal}</span>
+            <span class="meal-result-name">${r.flag} ${r.name}</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--text3)">${r.origin}</span>
+          </div>
+          <div class="meal-result-body">
+            <div class="ingredient-list">${r.tags.map(t => `<span class="ing-chip">${t}</span>`).join('')}</div>
+            <div class="meal-why"><span>★ Why this works</span>${r.why}</div>
+          </div>
+        </div>`;
     });
-    meals+='</div>';
+    mealsHTML += '</div>';
+
   } else {
-    meals='<div class="meals-output">';
-    state.prepPlan.forEach(p=>{
-      const allIng=[
-        ...p.cal.map(i=>({name:i,role:'Calories'})),
-      ];
-      meals+=`<div class="prep-result-card">
-        <div class="prep-result-header">
-          <span class="meal-time-badge ${p.meal}">${p.meal}</span>
-          <span class="prep-auto-label">Auto-Generated</span>
-          <span class="meal-result-name" style="margin-left:8px">Optimised Nutrition Prep</span>
-        </div>
-        <div class="prep-body">
-          <div class="prep-section">
-            <div class="prep-section-title">Ingredients</div>
-            ${allIng.map(i=>`<div class="prep-ing-row"><div class="prep-ing-name">${i.name}</div><div class="prep-ing-role">${i.role}</div></div>`).join('')}
-          </div>
-          <div class="prep-instructions"><b>How to prepare:</b> ${p.method}</div>
-          <div class="macro-strip">
-            ${macroRows.slice(0,4).map(([label,key,cls])=>`
-              <div class="macro-item">
-                <div class="macro-item-label">${label}</div>
-                <div class="macro-item-bar"><div class="macro-item-fill ${cls}" style="width:${job[key]*10}%"></div></div>
-                <div class="macro-item-val">${job[key]}/10</div>
-              </div>`).join('')}
-          </div>
-        </div>
-      </div>`;
-    });
-    meals+='</div><button class="reroll-btn" onclick="rerollPrep()">↻ Regenerate ingredients</button>';
-  }
+    let totalAchieved = state.prepPlan.reduce((s, p) => s + p.totalCals, 0);
 
-  document.getElementById('resultContent').innerHTML=`
+    mealsHTML = '<div class="meals-output">';
+
+    state.prepPlan.forEach(p => {
+      const foodRows = p.foods.length
+        ? p.foods.map(f => `
+            <div class="prep-ing-row">
+              <div class="prep-ing-name">${f.name}</div>
+              <div class="prep-ing-portion">${f.gramsUsed} g</div>
+              <div class="prep-ing-cals">${f.cals.toLocaleString()} kcal</div>
+            </div>`).join('')
+        : `<div class="prep-no-foods">⚠ No foods currently available. Restock inventory.</div>`;
+
+      mealsHTML += `
+        <div class="prep-result-card">
+          <div class="prep-result-header">
+            <span class="meal-time-badge ${p.meal}">${p.meal}</span>
+            <span class="prep-auto-label">Optimised from stock</span>
+            <span class="meal-calorie-target" style="margin-left:auto">
+              Target: ${p.targetCals.toLocaleString()} kcal
+            </span>
+          </div>
+          <div class="prep-body">
+
+            <div class="prep-section">
+              <div class="prep-section-title">Ingredients &amp; Portions</div>
+              <div class="prep-ing-header">
+                <span>Food item</span><span>Grams</span><span>Calories</span>
+              </div>
+              ${foodRows}
+            </div>
+
+            ${calBar(p.totalCals, p.targetCals)}
+
+            <div class="prep-instructions">
+              <b>How to prepare:</b> ${p.method}
+            </div>
+
+          </div>
+        </div>`;
+    });
+    mealsHTML += `
+      </div>
+      <div class="daily-summary">
+        <div class="daily-summary-title">Daily Calorie Total</div>
+        ${calBar(totalAchieved, totalDailyTarget)}
+        <div class="daily-summary-note">
+          ${activeMeals.length} meal${activeMeals.length > 1 ? 's' : ''} planned 
+          · ${state.foodInventory.length} food${state.foodInventory.length !== 1 ? 's' : ''} in stock
+        </div>
+      </div>
+      <button class="reroll-btn" onclick="rerollPrep()">↻ Regenerate meal plan</button>`;
+  }
+  document.getElementById('resultContent').innerHTML = `
     <div class="result-hero">
       <div class="result-job">Shipboard Role</div>
       <div class="result-headline">${job.name}</div>
-      <div class="result-sub">Nutrition demand: ${job.rating} · ${activeMeals.length} meal${activeMeals.length>1?'s':''} · ${mode==='recipe'?'Legacy Earth Recipes':'Auto-generated Meal Prep'}</div>
-      <div class="nutrition-radar">
-        ${macroRows.map(([label,key,cls])=>`
-          <div class="radar-item">
-            <div class="radar-label">${label}</div>
-            <div class="radar-bar"><div class="radar-fill ${cls}" style="width:${job[key]*10}%"></div></div>
-            <div class="radar-val">${job[key]}/10 demand</div>
+      <div class="result-sub">
+        ${job.activity} activity · ${totalDailyTarget.toLocaleString()} kcal/day target
+        · ${activeMeals.length} meal${activeMeals.length > 1 ? 's' : ''}
+        · ${mode === 'recipe' ? 'Legacy Earth Recipes' : 'Stock-Optimised Prep'}
+      </div>
+      <div class="calorie-summary-strip">
+        <div class="csb-item">
+          <div class="csb-label">Daily Target</div>
+          <div class="csb-value">${totalDailyTarget.toLocaleString()} kcal</div>
+        </div>
+        ${Object.entries(MEAL_RATIOS)
+            .filter(([m]) => activeMeals.includes(m))
+            .map(([m, r]) => `
+          <div class="csb-item">
+            <div class="csb-label">${m.charAt(0).toUpperCase() + m.slice(1)}</div>
+            <div class="csb-value">${Math.round(totalDailyTarget * r).toLocaleString()} kcal</div>
           </div>`).join('')}
       </div>
     </div>
-    ${meals}`;
+    ${mealsHTML}`;
 }
 
-function goTo(step,skipRender){
-  if(step===4&&!skipRender)renderSec4();
-  for(let i=1;i<=5;i++){
-    document.getElementById('sec'+i).classList.toggle('visible',i===step);
-    const s=document.getElementById('step'+i);
-    s.classList.toggle('active',i===step);
-    s.classList.toggle('done',i<step);
+function goTo(step, skipRender) {
+  if (step === 4 && !skipRender) renderSec4();
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById('sec' + i).classList.toggle('visible', i === step);
+    const s = document.getElementById('step' + i);
+    s.classList.toggle('active', i === step);
+    s.classList.toggle('done', i < step);
   }
-  state.step=step;
-  window.scrollTo({top:0,behavior:'smooth'});
+  state.step = step;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+// Pre-load inventory in the background so prep mode is instant
+fetchFoodInventory();
