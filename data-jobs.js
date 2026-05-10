@@ -1,175 +1,86 @@
 const JOBS = [
-  {
-    name: "Captain",
-    dailyCalories: 2400,
-    activity: "Light",
-    description: "Command, oversight & bridge watch. Mostly sedentary with high cognitive load."
-  },
-  {
-    name: "First Officer",
-    dailyCalories: 2300,
-    activity: "Light",
-    description: "Navigation, cargo planning, and watch-keeping duties."
-  },
-  {
-    name: "Second Officer",
-    dailyCalories: 2300,
-    activity: "Light",
-    description: "Safety officer, chart corrections, and navigation watch."
-  },
-  {
-    name: "Navigator",
-    dailyCalories: 2200,
-    activity: "Sedentary",
-    description: "Continuous chart plotting and GMDSS communications."
-  },
-  {
-    name: "Radio Operator",
-    dailyCalories: 2100,
-    activity: "Sedentary",
-    description: "Communications monitoring and equipment maintenance."
-  },
-
-  {
-    name: "Ship's Doctor",
-    dailyCalories: 2300,
-    activity: "Light",
-    description: "Medical consultations, clinic duties, and emergency response."
-  },
-  {
-    name: "Medic / Nurse",
-    dailyCalories: 2400,
-    activity: "Light",
-    description: "Patient care, rounds, and emergency first response."
-  },
-
-
-  {
-    name: "Cook / Chef",
-    dailyCalories: 2800,
-    activity: "Moderate",
-    description: "Galley operations, meal prep, and provisions management."
-  },
-  {
-    name: "Steward",
-    dailyCalories: 2700,
-    activity: "Moderate",
-    description: "Cabin service, laundry, and officer mess duties."
-  },
-  
-  {
-    name: "Chief Engineer",
-    dailyCalories: 3000,
-    activity: "Moderate–Heavy",
-    description: "Engine room management, oversight of all machinery."
-  },
-  {
-    name: "Engineer Officer",
-    dailyCalories: 3200,
-    activity: "Heavy",
-    description: "Watch-keeping, machinery maintenance, and fault diagnosis."
-  },
-  {
-    name: "Electrician",
-    dailyCalories: 2900,
-    activity: "Moderate",
-    description: "Electrical systems, switchboards, and wiring repairs."
-  },
-  {
-    name: "Motorman",
-    dailyCalories: 3300,
-    activity: "Heavy",
-    description: "Engine room maintenance support and routine machinery care."
-  },
-  {
-    name: "Welder / Fitter",
-    dailyCalories: 3600,
-    activity: "Very Heavy",
-    description: "Metal fabrication, welding, and structural repairs at sea."
-  },
-  {
-    name: "Pump Man",
-    dailyCalories: 3300,
-    activity: "Heavy",
-    description: "Cargo pump operations, tank cleaning, and pipeline maintenance."
-  },
-
-  // ── Deck ──────────────────────────────────────────────────────────────────
-  {
-    name: "Boatswain (Bosun)",
-    dailyCalories: 3500,
-    activity: "Very Heavy",
-    description: "Deck crew supervision, rigging, mooring, and deck maintenance."
-  },
-  {
-    name: "Able Seaman (AB)",
-    dailyCalories: 3400,
-    activity: "Heavy",
-    description: "Deck watches, maintenance, mooring lines, and cargo operations."
-  },
-  {
-    name: "Ordinary Seaman (OS)",
-    dailyCalories: 3200,
-    activity: "Heavy",
-    description: "General deck duties, lookout, and maintenance tasks."
-  },
-  {
-    name: "Deck Hand",
-    dailyCalories: 3600,
-    activity: "Very Heavy",
-    description: "Physical deck labor: painting, chipping, rigging, and cargo."
-  },
-  {
-    name: "Cargo Handler",
-    dailyCalories: 3900,
-    activity: "Extreme",
-    description: "Direct cargo loading, unloading, and lashing — heavy physical work."
-  },
-  {
-    name: "Crane Operator",
-    dailyCalories: 2800,
-    activity: "Moderate",
-    description: "Operating ship cranes and cargo gear; prolonged sitting with high focus."
-  },
-
-  
-  {
-    name: "Dive Supervisor",
-    dailyCalories: 3800,
-    activity: "Extreme",
-    description: "Saturation diving operations — extreme physical and pressure demands."
-  },
-  {
-    name: "Firefighter / Safety Officer",
-    dailyCalories: 3100,
-    activity: "Heavy",
-    description: "Fire drills, emergency response, and safety inspections."
-  },
-  {
-    name: "IT / Systems Tech",
-    dailyCalories: 2200,
-    activity: "Sedentary",
-    description: "Onboard IT infrastructure, satellite systems, and software."
-  }
+  { name: "EVA Engineer", type: "Physical", cal: 10, rating: "9.8/10" },
+  { name: "Construction Specialist", type: "Physical", cal: 10, rating: "9.7/10" },
+  { name: "Mining Specialist", type: "Physical", cal: 10, rating: "9.6/10" },
+  { name: "Security Officer", type: "Security", cal: 9, rating: "9.0/10" },
+  { name: "Technician", type: "Technical", cal: 8, rating: "8.7/10" },
+  { name: "Medical Officer", type: "Cognitive", cal: 5, rating: "7.9/10" },
+  { name: "AI Systems Operator", type: "Cognitive", cal: 4, rating: "7.8/10" },
+  { name: "Pilot / Navigator", type: "Navigation", cal: 6, rating: "8.0/10" },
+  { name: "Ship Teacher", type: "Social", cal: 4, rating: "6.8/10" }
 ];
 
-const MEAL_RATIOS = {
-  breakfast: 0.25,   
-  lunch:     0.35,   
-  dinner:    0.40    
+const RECIPES=[
+  {flag:"🇮🇳",name:"Butter Chicken",origin:"India",tags:["lab-grown chicken","hydroponic tomatoes","synthetic dairy","algae oil","garlic","onions"],why:"High morale meal. Strong cultural value. Protein-rich.",pro:8,carb:4,fat:7,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇳",name:"Dal Tadka",origin:"India",tags:["lentils","fermented soy paste","onions","garlic","yeast cultures","spices"],why:"Sustainable lentil base. Excellent plant protein and fibre.",pro:7,carb:7,fat:3,vit:7,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇮🇳",name:"Masala Oats",origin:"India",tags:["oats","onions","hydroponic tomatoes","garlic","yeast cultures"],why:"High-satiety breakfast, sustained energy release.",pro:5,carb:8,fat:3,vit:7,mealTypes:["breakfast"]},
+  {flag:"🇮🇳",name:"Chana Masala",origin:"India",tags:["chickpeas","hydroponic tomatoes","onions","garlic","bell peppers","spices"],why:"Iron and fibre powerhouse. Fully plant-based, zero waste.",pro:8,carb:7,fat:3,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇳",name:"Khichdi",origin:"India",tags:["rice cultures","lentils","onions","garlic","seeds","yeast cultures"],why:"The original recovery meal. Easy digestion post-shift.",pro:7,carb:8,fat:2,vit:7,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇯🇵",name:"Ramen",origin:"Japan",tags:["algae noodles","synthetic egg protein","seaweed sheets","fungal broth"],why:"Efficient ingredients + comforting warmth.",pro:7,carb:7,fat:4,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇯🇵",name:"Onigiri",origin:"Japan",tags:["rice cultures","seaweed sheets","fermented soy paste","seeds"],why:"Compact, portable, high morale.",pro:4,carb:9,fat:2,vit:5,mealTypes:["breakfast","lunch"]},
+  {flag:"🇯🇵",name:"Miso Soup & Rice",origin:"Japan",tags:["fermented soy paste","seaweed sheets","rice cultures","mushrooms","yeast cultures"],why:"Probiotic-rich. Gut health critical on long voyages.",pro:5,carb:8,fat:2,vit:8,mealTypes:["breakfast","lunch"]},
+  {flag:"🇯🇵",name:"Tofu Teriyaki Bowl",origin:"Japan",tags:["soybeans","fermented soy paste","rice cultures","seaweed sheets","seeds","algae oil"],why:"Complete amino acids from soy. Algae oil boosts omega-3.",pro:8,carb:7,fat:5,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇲🇽",name:"Tacos",origin:"Mexico",tags:["insect protein tortillas","lentils","lab-grown chicken","hydroponic vegetables"],why:"Flexible recipe using minimal resources.",pro:9,carb:6,fat:4,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇲🇽",name:"Black Bean Burrito",origin:"Mexico",tags:["soybeans","rice cultures","hydroponic lettuce","fermented soy paste","bell peppers"],why:"Dense calorie and protein payload for heavy-duty crews.",pro:8,carb:8,fat:3,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🇲🇽",name:"Pozole de Hongos",origin:"Mexico",tags:["mycoprotein fungi","hydroponic vegetables","onions","garlic","herbs","bell peppers"],why:"Traditional stew adapted. Fungi = sustainable protein.",pro:7,carb:7,fat:3,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇬🇧",name:"Shepherd's Pie",origin:"United Kingdom",tags:["hydroponic potatoes","mycoprotein fungi","algae oil","onions","garlic"],why:"Dense calories for physical workers.",pro:7,carb:8,fat:5,vit:6,mealTypes:["dinner"]},
+  {flag:"🇬🇧",name:"Porridge & Seeds",origin:"United Kingdom",tags:["oats","seeds","fruit cell cultures","yeast cultures"],why:"Slow-release energy. Ideal pre-shift morning meal.",pro:5,carb:8,fat:5,vit:7,mealTypes:["breakfast"]},
+  {flag:"🇬🇧",name:"Lentil Cottage Pie",origin:"United Kingdom",tags:["lentils","hydroponic potatoes","mushrooms","onions","garlic"],why:"100% plant-based. Zero waste. High protein efficiency.",pro:8,carb:8,fat:2,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇰🇷",name:"Bibimbap",origin:"South Korea",tags:["rice cultures","hydroponic greens","synthetic egg protein","fermented soy paste"],why:"Balanced nutrition in one bowl.",pro:7,carb:8,fat:5,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇰🇷",name:"Kimchi Fried Rice",origin:"South Korea",tags:["rice cultures","fermented soy paste","synthetic egg protein","seaweed sheets","yeast cultures"],why:"Fermented foods support gut microbiome in zero-G.",pro:6,carb:8,fat:4,vit:8,mealTypes:["breakfast","lunch"]},
+  {flag:"🇰🇷",name:"Sundubu Jjigae",origin:"South Korea",tags:["soybeans","mushrooms","hydroponic greens","seaweed sheets","fermented soy paste","synthetic egg protein"],why:"Silken tofu stew. High protein, anti-inflammatory.",pro:8,carb:4,fat:5,vit:9,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇮🇹",name:"Margherita Pizza",origin:"Italy",tags:["algae flour crust","hydroponic tomatoes","synthetic dairy","herbs"],why:"Massive morale booster and social food.",pro:6,carb:8,fat:6,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇹",name:"Pasta e Fagioli",origin:"Italy",tags:["lentils","chickpeas","fermented soy paste","onions","garlic","seaweed sheets"],why:"Complete amino acid profile. Low resource cost.",pro:8,carb:8,fat:2,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇹",name:"Risotto ai Funghi",origin:"Italy",tags:["rice cultures","mycoprotein fungi","synthetic dairy","yeast cultures","onions","algae oil"],why:"Warming comfort food. Fungi = low-impact protein.",pro:6,carb:8,fat:6,vit:7,mealTypes:["dinner"]},
+  {flag:"🇻🇳",name:"Pho",origin:"Vietnam",tags:["algae broth","rice cultures","hydroponic herbs","cultured beef strips"],why:"Hydrating and efficient.",pro:7,carb:7,fat:3,vit:9,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇻🇳",name:"Bánh Mì Bowl",origin:"Vietnam",tags:["insect protein flour","fermented soy paste","hydroponic lettuce","rice cultures"],why:"Street-food efficiency. High morale from complex flavours.",pro:8,carb:7,fat:4,vit:7,mealTypes:["lunch"]},
+  {flag:"🌍",name:"Falafel Wraps",origin:"Middle East",tags:["chickpeas","algae flatbread","hydroponic lettuce","herbs","garlic"],why:"Cheap, sustainable protein source.",pro:8,carb:7,fat:4,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🌍",name:"Shakshuka",origin:"North Africa",tags:["hydroponic tomatoes","synthetic egg protein","onions","garlic","bell peppers","spices"],why:"Iron-rich, anti-inflammatory. Excellent crew wellness food.",pro:7,carb:5,fat:5,vit:9,mealTypes:["breakfast","lunch"]},
+  {flag:"🌍",name:"Hummus & Flatbread",origin:"Middle East",tags:["chickpeas","algae oil","garlic","algae flatbread","seeds"],why:"High-fibre snack. Excellent calcium source.",pro:6,carb:7,fat:6,vit:6,mealTypes:["breakfast","lunch"]},
+  {flag:"🌍",name:"Tagine de Lentilles",origin:"Morocco",tags:["lentils","hydroponic tomatoes","onions","garlic","sweet potatoes","spices"],why:"North African spice blend fights inflammation. Dense nutrients.",pro:8,carb:8,fat:2,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🌍",name:"Koshari",origin:"Egypt",tags:["rice cultures","lentils","chickpeas","onions","hydroponic tomatoes","garlic"],why:"Three complete proteins in one bowl.",pro:8,carb:9,fat:2,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇨🇳",name:"Fried Rice",origin:"China",tags:["rice cultures","synthetic egg protein","hydroponic vegetables","fermented soy paste"],why:"Uses leftovers efficiently with minimal waste.",pro:6,carb:8,fat:4,vit:6,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇨🇳",name:"Congee",origin:"China",tags:["rice cultures","seaweed sheets","fermented soy paste","mushrooms"],why:"Ultra light, restorative. Ideal for recovery days.",pro:4,carb:8,fat:1,vit:7,mealTypes:["breakfast"]},
+  {flag:"🇨🇳",name:"Mapo Tofu",origin:"China",tags:["soybeans","mycoprotein fungi","fermented soy paste","onions","garlic","algae oil"],why:"Complete protein. Spiced oil aids circulation on long shifts.",pro:9,carb:3,fat:6,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇨🇦",name:"Poutine",origin:"Canada",tags:["hydroponic potato fries","synthetic dairy curds","mycoprotein gravy"],why:"Comfort food during morale crises.",pro:5,carb:9,fat:6,vit:4,mealTypes:["lunch","dinner"]},
+  {flag:"🇪🇹",name:"Injera & Lentil Stew",origin:"Ethiopia",tags:["lentils","fermented soy paste","onions","garlic","bell peppers","yeast cultures"],why:"Fermented injera feeds gut biome. Lentils = zero-waste protein.",pro:8,carb:7,fat:2,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇪🇹",name:"Tibs Fitfit",origin:"Ethiopia",tags:["lab-grown chicken","fermented soy paste","onions","garlic","bell peppers","herbs"],why:"Protein-packed celebration dish. Community morale booster.",pro:9,carb:4,fat:5,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇬🇷",name:"Greek Quinoa Bowl",origin:"Greece",tags:["quinoa","hydroponic tomatoes","synthetic dairy","algae oil","hydroponic herbs"],why:"Complete protein from quinoa. Mediterranean longevity diet.",pro:7,carb:7,fat:6,vit:9,mealTypes:["breakfast","lunch"]},
+  {flag:"🇵🇪",name:"Quinoa Stew",origin:"Peru",tags:["quinoa","soybeans","sweet potatoes","onions","garlic","seeds"],why:"Andean superfood combo. Excellent for high-demand crew.",pro:8,carb:8,fat:4,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇵🇪",name:"Causa Rellena",origin:"Peru",tags:["hydroponic potatoes","lentils","algae oil","hydroponic lettuce","onions"],why:"Layered potato terrine. High-density carb for physical labour.",pro:6,carb:9,fat:4,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇳🇬",name:"Jollof Rice & Beans",origin:"Nigeria",tags:["rice cultures","soybeans","hydroponic tomatoes","onions","bell peppers"],why:"Culturally iconic across Africa. High morale from familiarity.",pro:7,carb:8,fat:3,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇳🇬",name:"Egusi Soup",origin:"Nigeria",tags:["seeds","soybeans","hydroponic greens","onions","mushrooms","algae oil"],why:"Melon seeds = extremely high fat and protein density.",pro:8,carb:4,fat:9,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇧🇷",name:"Feijão Tropeiro",origin:"Brazil",tags:["soybeans","rice cultures","synthetic egg protein","garlic","onions"],why:"Calorie-dense cowboy meal. Excellent for physical labour.",pro:8,carb:8,fat:4,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🇹🇭",name:"Green Curry",origin:"Thailand",tags:["mycoprotein fungi","algae milk","hydroponic vegetables","rice cultures","herbs"],why:"Anti-inflammatory spices. Flavour complexity lifts morale.",pro:6,carb:7,fat:7,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇹🇭",name:"Tom Yum Broth",origin:"Thailand",tags:["algae broth","mushrooms","lemongrass","hydroponic herbs","synthetic egg protein"],why:"Hydrating immunity broth. Lemongrass combats space fatigue.",pro:5,carb:3,fat:3,vit:10,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇺🇸",name:"Protein Power Bowl",origin:"USA",tags:["insect protein flour","sweet potatoes","seeds","kale","algae oil"],why:"Designed for max performance. High protein density per gram.",pro:9,carb:7,fat:6,vit:9,mealTypes:["breakfast","lunch"]},
+  {flag:"🇪🇸",name:"Vegetable Paella",origin:"Spain",tags:["rice cultures","bell peppers","onions","mushrooms","garlic","algae oil"],why:"Communal dish — crew social bonding meal.",pro:5,carb:9,fat:4,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇷",name:"Ash Reshteh",origin:"Iran",tags:["lentils","chickpeas","soybeans","algae noodles","onions","herbs","yeast cultures"],why:"Thick Persian herb noodle soup. Rich in plant iron and folate.",pro:8,carb:8,fat:2,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇬🇭",name:"Red Red",origin:"Ghana",tags:["soybeans","sweet potatoes","onions","bell peppers","algae oil","hydroponic tomatoes"],why:"Black-eyed bean stew. Essential B-vitamins for nerve health.",pro:8,carb:7,fat:4,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇵🇭",name:"Sinigang na Gulay",origin:"Philippines",tags:["hydroponic vegetables","soybeans","mushrooms","onions","algae broth","garlic"],why:"Sour tamarind broth. Vitamin C boosts immune function.",pro:6,carb:5,fat:3,vit:10,mealTypes:["lunch","dinner"]},
+  {flag:"🇹🇷",name:"Mercimek Çorbası",origin:"Turkey",tags:["lentils","onions","garlic","hydroponic tomatoes","algae oil","spices"],why:"Red lentil soup. Simple, low-waste, high-iron.",pro:8,carb:7,fat:3,vit:8,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇯🇲",name:"Ackee & Protein Hash",origin:"Jamaica",tags:["soybeans","hydroponic tomatoes","onions","bell peppers","algae oil","synthetic egg protein"],why:"Cultural staple reimagined. Unique Caribbean nutrient profile.",pro:7,carb:5,fat:7,vit:8,mealTypes:["breakfast","lunch"]},
+  {flag:"🇦🇷",name:"Locro Stew",origin:"Argentina",tags:["chickpeas","sweet potatoes","onions","garlic","bell peppers","seeds"],why:"Thick winter stew. Dense calories for extreme physical work.",pro:7,carb:8,fat:4,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇩",name:"Nasi Goreng",origin:"Indonesia",tags:["rice cultures","synthetic egg protein","soybeans","fermented soy paste","garlic","onions"],why:"Indonesia's comfort food. High morale, highly adaptable.",pro:7,carb:8,fat:5,vit:7,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇺🇦",name:"Borscht",origin:"Ukraine",tags:["hydroponic tomatoes","soybeans","onions","garlic","mushrooms","yeast cultures"],why:"Simulated beetroot base rich in nitrates. Boosts circulation.",pro:6,carb:6,fat:2,vit:10,mealTypes:["lunch","dinner"]},
+  {flag:"🇸🇳",name:"Thieboudienne Bowl",origin:"Senegal",tags:["rice cultures","cultured fish cells","hydroponic tomatoes","onions","bell peppers","algae oil"],why:"West Africa's favourite rice-fish dish. Rich in omega-3.",pro:8,carb:8,fat:5,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇵🇰",name:"Daal Chawal",origin:"Pakistan",tags:["lentils","rice cultures","onions","garlic","spices","yeast cultures"],why:"Complete protein combination. Cultural comfort across South Asia.",pro:8,carb:8,fat:2,vit:7,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇳🇵",name:"Dal Bhat",origin:"Nepal",tags:["lentils","rice cultures","spinach","garlic","onions","spices"],why:"Sherpa staple. High-altitude endurance food repurposed for space.",pro:8,carb:8,fat:2,vit:9,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇲🇾",name:"Nasi Lemak Bowl",origin:"Malaysia",tags:["rice cultures","algae milk","insect protein flour","seaweed sheets","seeds","onions"],why:"Aromatic coconut rice bowl. Cultural morale anchor for Southeast Asian crew.",pro:7,carb:8,fat:6,vit:7,mealTypes:["breakfast","lunch"]},
+  {flag:"🇰🇪",name:"Ugali & Sukuma Wiki",origin:"Kenya",tags:["sweet potatoes","kale","soybeans","onions","algae oil","garlic"],why:"East African staple. Kale = dense micronutrient source.",pro:7,carb:8,fat:3,vit:10,mealTypes:["lunch","dinner"]},
+  {flag:"🇿🇦",name:"Umngqusho",origin:"South Africa",tags:["soybeans","sweet potatoes","onions","garlic","bell peppers","seeds"],why:"Xhosa samp and beans dish. Complete plant protein pairing.",pro:8,carb:8,fat:3,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇷🇺",name:"Buckwheat Kasha",origin:"Russia",tags:["quinoa","mushrooms","onions","algae oil","yeast cultures","seeds"],why:"Buckwheat substitute. High magnesium for muscle recovery.",pro:6,carb:8,fat:4,vit:8,mealTypes:["breakfast","lunch"]},
+  {flag:"🇵🇱",name:"Żurek Soup",origin:"Poland",tags:["lentils","mycoprotein fungi","onions","garlic","yeast cultures","soybeans"],why:"Fermented rye soup adapted. Probiotic base for gut support.",pro:7,carb:6,fat:3,vit:8,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇦🇪",name:"Harees",origin:"UAE / Gulf",tags:["oats","lab-grown chicken","onions","garlic","algae oil","spices"],why:"Ancient wheat-meat porridge. High calorie density for demanding shifts.",pro:8,carb:8,fat:4,vit:6,mealTypes:["breakfast","dinner"]},
+  {flag:"🇲🇲",name:"Mohinga",origin:"Myanmar",tags:["algae noodles","cultured fish cells","lemongrass","onions","garlic","herbs"],why:"Myanmar's national breakfast. Warming fish noodle broth, immune support.",pro:7,carb:6,fat:4,vit:9,mealTypes:["breakfast","lunch"]},
+];
+
+const ING = {
+    energy: ["Soy Chunks", "Rice", "Oats", "Pasta", "Lentils", "Algae Oil", "Synthetic Potato"]
 };
 
 const METHODS = [
-  "Boil until tender, season with salt and serve hot.",
-  "Pan-fry in a light oil over medium heat until golden.",
-  "Steam for 12–15 minutes, preserving nutrients and texture.",
-  "Roast at 200 °C for 25 minutes until caramelised.",
-  "Stir-fry on high heat for 5–7 minutes, toss frequently.",
-  "Slow-cook on low heat for 45 minutes to develop flavour.",
-  "Microwave with a splash of water, covered, for 4–5 minutes.",
-  "Blanch in boiling water for 2 minutes, then ice-bath to retain colour.",
-  "Grill for 8–10 minutes, turning halfway through.",
-  "Bake covered at 180 °C for 30 minutes until soft through.",
-  "Sauté with aromatics over medium-high heat until fragrant.",
-  "Pressure-cook for 10 minutes to retain maximum nutrition."
+    "Flash-heat and compress into energy bar",
+    "Hydrate and blend into caloric shake",
+    "Pressure-cook and serve as high-density bowl"
 ];
