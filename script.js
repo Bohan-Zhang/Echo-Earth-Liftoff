@@ -17,6 +17,31 @@ let state = {
   inventoryLoaded: false 
 };
 
+// JOB GRID
+// Render available job cards and filter by search input
+function renderJobs(filter = '') {
+  const f = filter.toLowerCase();
+  document.getElementById('jobGrid').innerHTML = JOBS
+    .filter(j => {
+      if (j.dailyCalories == null) {
+        console.warn('[ShipFuel] Job missing dailyCalories:', j);
+        return false;
+      }
+      return j.name.toLowerCase().includes(f);
+    })
+    .map(j => `
+      <div class="job-card ${state.job === j.name ? 'selected' : ''}"
+           onclick="selectJob('${j.name.replace(/'/g, "\\'")}')">
+        <div class="job-name">${j.name}</div>
+        <div class="job-stats">
+          <span class="stat-pill calories-pill"> ${(j.dailyCalories ?? 0).toLocaleString()} kcal/day</span>
+          <span class="stat-pill activity-pill">${j.activity}</span>
+        </div>
+        <div class="job-desc">${j.description}</div>
+      </div>`) 
+    .join('');
+}
+
 // Utility: clean CSV cells by stripping quotes and trimming whitespace
 const cleanVal = (val) => val ? val.replace(/"/g, '').trim() : '';
 
@@ -45,8 +70,23 @@ async function refreshInventory() {
     return false;
   }
 }
-
-
+async function changeStock(foodName, amount) {
+    try {
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({
+                action: "updateStock",
+                name: foodName,
+                amount: amount
+            })
+        });
+        console.log(`[Sync] Sent -${amount}g update for ${foodName}`);
+    } catch (e) {
+        console.error("Database sync failed", e);
+    }
+}
 
 // ============================================================================
 // CALORIE OPTIMISER
@@ -55,105 +95,77 @@ async function refreshInventory() {
 // Select foods for a meal based on the calorie target and available stock
 
 function selectFoodsForMeal(availableFoods, targetCals) {
-  const pool = [...availableFoods].sort(() => Math.random() - 0.5); // Randomize order for variety
+  // OPTIMIZATION: Sort by stock descending. 
+  // This uses items you have the most of first.
+  const pool = [...availableFoods].sort((a, b) => b.stock - a.stock);
 
-  const selected  = [];
-  let   totalCals = 0;
+  const selected = [];
+  let totalCals = 0;
 
   for (const food of pool) {
-    const remaining = targetCals - totalCals;
-    if (remaining < 40) break; // Stop once we're close enough to the target
+    let remaining = targetCals - totalCals;
+    if (remaining < 20) break; // Efficiency: Stop if we are essentially at the goal
 
-    const maxContrib  = Math.min(remaining, targetCals * 0.40);   // Cap each ingredient at 40% of remaining calories
-    const gramsNeeded = Math.round((maxContrib / food.calories) * 100);
-    const gramsUsed   = Math.min(gramsNeeded, food.stock, 350);   // Respect stock and max portion size
+    // Logic: Calculate how much of this specific food to use to hit the target
+    // We want to get as close to the target as possible using the high-stock items
+    let gramsNeeded = Math.round((remaining / food.calories) * 100);
+    
+    // Safety check: Don't take more than we have, and don't make a portion huge (>500g)
+    let gramsUsed = Math.min(gramsNeeded, food.stock, 500);
 
-    if (gramsUsed < 30) continue;                                 // Skip tiny portions
+    if (gramsUsed < 10) continue; 
 
-    const calsFromFood = Math.round((gramsUsed * food.calories) / 100);
-    if (calsFromFood < 30) continue;                              // Skip low-calorie additions
+    let calsFromFood = Math.round((gramsUsed * food.calories) / 100);
 
     selected.push({
-      name:            food.name,
-      gramsUsed,
-      cals:            calsFromFood,
-      caloriesPer100g: food.calories
+      name: food.name,
+      gramsUsed: gramsUsed,
+      cals: calsFromFood
     });
 
     totalCals += calsFromFood;
-    if (totalCals >= targetCals * 0.93) break;                     // Stop when close to the target
+    
+    // If we've reached 98% of the target, we consider this "The Optimal Meal"
+    if (totalCals >= targetCals * 0.98) break;
   }
 
   return { foods: selected, totalCals };
 }
 
 // Generate the prep plan for active meals using the available inventory
-function generatePrep(job, activeMeals) {
+async function generatePrep(job, activeMeals) {
   const inStock = state.foodInventory;
-
-  if (inStock.length === 0) {
-    return activeMeals.map(meal => ({
-      meal,
-      foods:      [],
-      totalCals:  0,
-      targetCals: Math.round(job.dailyCalories * (MEAL_RATIOS[meal] || 0.33)),
-      method:     'Not enough food is available.'
-    }));
-  }
-
-  // Clone inventory so selected quantities are deducted meal-by-meal.
-  // This ensures earlier meals consume stock before later meals are generated.
   const inventory = inStock.map(item => ({ ...item }));
 
   const plan = activeMeals.map(meal => {
-    const ratio      = MEAL_RATIOS[meal] || (1 / activeMeals.length);
+    const ratio = MEAL_RATIOS[meal] || (1 / activeMeals.length);
     const targetCals = Math.round(job.dailyCalories * ratio);
     const { foods, totalCals } = selectFoodsForMeal(inventory, targetCals);
 
-    // Reduce used stock from the cloned inventory after generating this meal.
-    // Later meals will then see the updated remaining inventory.
+    // Update local inventory and fire off database updates
     foods.forEach(f => {
       const stockItem = inventory.find(i => i.name === f.name);
       if (stockItem) {
-        stockItem.stock = Math.max(stockItem.stock - f.gramsUsed, 0);
+        stockItem.stock -= f.gramsUsed;
+        // Fire the update but don't 'await' it here to keep the UI fast
+        changeStock(f.name, -f.gramsUsed); 
       }
     });
 
-    const method = (foods.length === 0 || totalCals < targetCals)
-      ? 'Not enough food is available.'
-      : METHODS[Math.floor(Math.random() * METHODS.length)];
-
-    return { meal, foods, totalCals, targetCals, method };
+    return { 
+      meal, 
+      foods, 
+      totalCals, 
+      targetCals, 
+      method: METHODS[Math.floor(Math.random() * METHODS.length)] 
+    };
   });
 
   state.foodInventory = inventory;
   return plan;
 }
 
-// JOB GRID
-// Render available job cards and filter by search input
-function renderJobs(filter = '') {
-  const f = filter.toLowerCase();
-  document.getElementById('jobGrid').innerHTML = JOBS
-    .filter(j => {
-      if (j.dailyCalories == null) {
-        console.warn('[ShipFuel] Job missing dailyCalories:', j);
-        return false;
-      }
-      return j.name.toLowerCase().includes(f);
-    })
-    .map(j => `
-      <div class="job-card ${state.job === j.name ? 'selected' : ''}"
-           onclick="selectJob('${j.name.replace(/'/g, "\\'")}')">
-        <div class="job-name">${j.name}</div>
-        <div class="job-stats">
-          <span class="stat-pill calories-pill"> ${(j.dailyCalories ?? 0).toLocaleString()} kcal/day</span>
-          <span class="stat-pill activity-pill">${j.activity}</span>
-        </div>
-        <div class="job-desc">${j.description}</div>
-      </div>`) 
-    .join('');
-}
+
 
 
 // Filter jobs list when the user types in search
@@ -194,23 +206,23 @@ function selectMode(mode) {
 }
 
 // Advance after mode selection; recipe mode goes to browser, prep mode generates the plan
+// Add 'async' here
 async function handleModeNext() {
-  if (!state.mode) { alert('Please select a mode first!'); return; }
+  console.log("Mode Next Clicked! Current Mode:", state.mode);
 
-  const job    = JOBS.find(j => j.name === state.job);
-  const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
-
-  if (state.mode === 'recipe') {
-    goTo(4);
-  } else {
-    if (state.foodInventory.length === 0) {
-      document.getElementById('nextBtn3').textContent = 'Loading inventory…';
-      await refreshInventory();
-      document.getElementById('nextBtn3').textContent = 'Continue →';
-    }
-    state.prepPlan = generatePrep(job, active);
+  if (state.mode === 'recipe') { 
+    goTo(4); 
+  } else if (state.mode === 'prep') {
+    const job = JOBS.find(j => j.name === state.job);
+    const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
+    
+    // Add 'await' here so it finishes the spreadsheet updates before moving on
+    state.prepPlan = await generatePrep(job, active);
+    
     renderResults(job, active, 'prep');
-    goTo(5, true);
+    goTo(5, true); // This moves you to the results page
+  } else {
+    alert("Please select a mode first!");
   }
 }
 
