@@ -612,7 +612,7 @@ function renderResults(job, activeMeals, mode) {
           </div>
           <div class="meal-result-body">
             ${ingredientDetails}
-            <div class="meal-why"><span>★ Why this works</span>${r.why}</div>
+            
             ${canMake ? `<div class="recipe-calories"><strong>Calories provided:</strong> ${totalCalories} kcal</div>` : ''}
             <div class="meal-action">${makeButtonHTML}</div>
           </div>
