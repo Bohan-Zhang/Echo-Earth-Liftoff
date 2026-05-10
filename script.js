@@ -37,6 +37,7 @@ async function refreshInventory() {
       };
     }).filter(f => f.name !== ""); // Only keep rows with names
 
+    state.inventoryLoaded = true;
     console.log("Inventory synced with Google Sheets.");
     return true;
   } catch (e) {
@@ -287,9 +288,19 @@ function filterCountry(btn, country) {
 }
 
 // Build the final recipe-based plan and show results
-function buildRecipePlan() {
+async function buildRecipePlan() {
   const job    = JOBS.find(j => j.name === state.job);
   const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
+  
+  // Always refresh inventory from Google Sheet to get latest stock levels
+  const statusDiv = document.getElementById('sec4Content');
+  const originalHTML = statusDiv.innerHTML;
+  statusDiv.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text3);">Refreshing inventory from server...</div>';
+  
+  await refreshInventory();
+  
+  statusDiv.innerHTML = originalHTML;
+  
   renderResults(job, active, 'recipe');
   goTo(5, true);
 }
@@ -300,6 +311,158 @@ function rerollPrep() {
   const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
   state.prepPlan = generatePrep(job, active);
   renderResults(job, active, 'prep');
+}
+
+// Refresh inventory and re-render recipe results
+async function refreshAndRerenderRecipes() {
+  const job    = JOBS.find(j => j.name === state.job);
+  const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
+  
+  // Show loading state
+  const refreshBtn = event.target;
+  const originalText = refreshBtn.textContent;
+  refreshBtn.disabled = true;
+  refreshBtn.textContent = 'Refreshing...';
+  
+  try {
+    await refreshInventory();
+    renderResults(job, active, 'recipe');
+  } catch (error) {
+    console.error('Error refreshing inventory:', error);
+    alert('Failed to refresh inventory');
+  } finally {
+    refreshBtn.disabled = false;
+    refreshBtn.textContent = originalText;
+  }
+}
+
+// Check if a recipe can be made with current inventory
+// Returns { canMake: boolean, missingIngredients: [], totalCalories: number }
+function canMakeMeal(recipe) {
+  const missingIngredients = [];
+  let totalCalories = 0;
+  
+  if (!state.foodInventory || state.foodInventory.length === 0) {
+    return {
+      canMake: false,
+      missingIngredients: Object.keys(recipe.ingredients || {}),
+      totalCalories: 0
+    };
+  }
+
+  // Convert recipe ingredient keys (snake_case) to match inventory names
+  for (const [ingredientKey, requiredAmount] of Object.entries(recipe.ingredients || {})) {
+    // Try to find ingredient in inventory (convert snake_case to space-separated)
+    const ingredientName = ingredientKey.replace(/_/g, ' ').toLowerCase();
+    
+    const inventoryItem = state.foodInventory.find(item => 
+      item.name.toLowerCase().includes(ingredientName) ||
+      ingredientName.includes(item.name.toLowerCase())
+    );
+
+    if (!inventoryItem) {
+      missingIngredients.push({ ingredient: ingredientKey, required: requiredAmount, available: 0 });
+    } else if (inventoryItem.stock < requiredAmount) {
+      missingIngredients.push({ 
+        ingredient: ingredientKey, 
+        required: requiredAmount, 
+        available: inventoryItem.stock 
+      });
+    } else {
+      // Calculate calories for this ingredient
+      // inventoryItem.calories is per 100g, requiredAmount is in grams
+      const ingredientCalories = (requiredAmount / 100) * inventoryItem.calories;
+      totalCalories += ingredientCalories;
+    }
+  }
+
+  return {
+    canMake: missingIngredients.length === 0,
+    missingIngredients,
+    totalCalories: Math.round(totalCalories)
+  };
+}
+
+// Make a meal from a recipe: deduct ingredients and sync with server
+// Returns { success: boolean, message: string, mealName: string }
+async function makeMeal(recipe) {
+  // First check if meal can be made
+  const checkResult = canMakeMeal(recipe);
+  
+  if (!checkResult.canMake) {
+    const missingList = checkResult.missingIngredients
+      .map(m => `${m.ingredient} (need ${m.required}g, have ${m.available}g)`)
+      .join(', ');
+    return {
+      success: false,
+      message: `Not enough ingredients to make ${recipe.name}. Missing: ${missingList}`,
+      mealName: recipe.name
+    };
+  }
+
+  try {
+    // Update inventory by deducting ingredients
+    const updates = [];
+    
+    for (const [ingredientKey, requiredAmount] of Object.entries(recipe.ingredients || {})) {
+      const ingredientName = ingredientKey.replace(/_/g, ' ').toLowerCase();
+      
+      const inventoryIndex = state.foodInventory.findIndex(item => 
+        item.name.toLowerCase().includes(ingredientName) ||
+        ingredientName.includes(item.name.toLowerCase())
+      );
+
+      if (inventoryIndex !== -1) {
+        const inventoryItem = state.foodInventory[inventoryIndex];
+        
+        // Deduct from local state
+        state.foodInventory[inventoryIndex].stock = Math.max(
+          inventoryItem.stock - requiredAmount, 
+          0
+        );
+
+        // Prepare sync request to server
+        updates.push({
+          name: inventoryItem.name,
+          amount: -requiredAmount // Negative to reduce stock
+        });
+      }
+    }
+
+    // Sync all inventory changes with server
+    for (const update of updates) {
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({
+            action: 'updateStock',
+            name: update.name,
+            amount: update.amount
+          })
+        });
+      } catch (e) {
+        console.warn(`Failed to sync ${update.name} with server:`, e);
+      }
+    }
+
+    return {
+      success: true,
+      message: `✓ Successfully made ${recipe.name}! Ingredients deducted from inventory.`,
+      mealName: recipe.name,
+      ingredientsUsed: Object.entries(recipe.ingredients).map(([k, v]) => ({
+        ingredient: k,
+        amount: v
+      }))
+    };
+  } catch (error) {
+    console.error('Error making meal:', error);
+    return {
+      success: false,
+      message: `Error making ${recipe.name}: ${error.message}`,
+      mealName: recipe.name
+    };
+  }
 }
 
 // Generate a calorie progress bar with color coding based on completion
@@ -318,25 +481,128 @@ function calBar(got, target) {
 }
 
 // Render the full results page for either recipe or prep mode
+async function prepareMeal(recipeName, recipeCalories) {
+  const recipe = RECIPES.find(r => r.name === recipeName);
+  if (!recipe) {
+    alert('Recipe not found');
+    return;
+  }
+
+  // Ask user for desired calories
+  const desiredCalories = prompt(`${recipe.name} provides ${recipeCalories} kcal.\n\nHow many calories do you want to consume? (Enter number or press Cancel to use full amount)`, recipeCalories);
+  
+  if (desiredCalories === null) return; // User cancelled
+  
+  const userCalories = parseInt(desiredCalories);
+  if (isNaN(userCalories) || userCalories <= 0) {
+    alert('Please enter a valid calorie amount');
+    return;
+  }
+
+  // Show loading state
+  const btn = event.target;
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Making meal...';
+
+  try {
+    // Make the meal
+    const result = await makeMeal(recipe);
+
+    // Show result message
+    const statusClass = result.success ? 'success' : 'error';
+    const calorieInfo = result.success ? `<div class="calorie-info">Expected calories: ${recipeCalories} kcal | Consumed: ${userCalories} kcal</div>` : '';
+    const resultHTML = `
+      <div class="meal-result-notification ${statusClass}">
+        <div class="notification-icon">${result.success ? '✓' : '✗'}</div>
+        <div class="notification-message">${result.message}</div>
+        ${calorieInfo}
+        ${result.ingredientsUsed ? `
+          <div class="ingredients-deducted">
+            <div class="deducted-title">Ingredients deducted:</div>
+            ${result.ingredientsUsed.map(ing => `<div class="deducted-item">• ${ing.ingredient}: -${ing.amount}g</div>`).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    // Insert notification before the meals output
+    const mealsOutput = document.querySelector('.meals-output');
+    if (mealsOutput) {
+      const notification = document.createElement('div');
+      notification.innerHTML = resultHTML;
+      mealsOutput.parentNode.insertBefore(notification.firstChild, mealsOutput);
+    }
+
+    // Update button state
+    if (result.success) {
+      btn.classList.add('completed');
+      btn.textContent = '✓ Meal prepared';
+      btn.disabled = true;
+    } else {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  } catch (error) {
+    console.error('Error preparing meal:', error);
+    btn.disabled = false;
+    btn.textContent = originalText;
+    alert('Error preparing meal: ' + error.message);
+  }
+}
+
+// Render the full results page for either recipe or prep mode
 function renderResults(job, activeMeals, mode) {
   const totalDailyTarget = job.dailyCalories;
   let mealsHTML = '';
 
   if (mode === 'recipe') {
     mealsHTML = '<div class="meals-output">';
+    mealsHTML += `
+      <div class="inventory-refresh-notice">
+        <div class="refresh-notice-text">Inventory synced from Google Sheets</div>
+        <button class="refresh-btn" onclick="refreshAndRerenderRecipes()">↻ Refresh Stock</button>
+      </div>
+    `;
     activeMeals.forEach(meal => {
       const r = RECIPES.find(x => x.name === state.selections[meal]);
       if (!r) return;
+      
+      // Check if recipe can be made with current inventory
+      const checkResult = canMakeMeal(r);
+      const canMake = checkResult.canMake;
+      const statusClass = canMake ? 'can-make' : 'cannot-make';
+      const statusIcon = canMake ? '✓' : '✗';
+      const statusText = canMake ? 'Ready to prepare' : 'Insufficient ingredients';
+      const totalCalories = checkResult.totalCalories;
+      
+      let ingredientDetails = `<div class="ingredient-list">${r.tags.map(t=>`<span class="ing-chip">${t}</span>`).join('')}</div>`;
+      
+      // Show ingredient requirements and availability
+      if (!canMake && checkResult.missingIngredients.length > 0) {
+        const missingInfo = checkResult.missingIngredients
+          .map(m => `<div class="missing-ingredient">${m.ingredient}: need ${m.required}g, have ${m.available}g</div>`)
+          .join('');
+        ingredientDetails += `<div class="missing-ingredients-box">${missingInfo}</div>`;
+      }
+
+      const makeButtonHTML = canMake 
+        ? `<button class="make-meal-btn" onclick="prepareMeal('${r.name.replace(/'/g,"\\'")}', ${totalCalories})">Make Meal</button>`
+        : `<button class="make-meal-btn disabled" disabled>Cannot Make</button>`;
+      
       mealsHTML += `
-        <div class="meal-result">
+        <div class="meal-result ${statusClass}">
           <div class="meal-result-header">
             <span class="meal-time-badge ${meal}">${meal}</span>
             <span class="meal-result-name">${r.flag} ${r.name}</span>
+            <span class="meal-status-badge ${statusClass}">${statusIcon} ${statusText}</span>
             <span style="margin-left:auto;font-size:11px;color:var(--text3)">${r.origin}</span>
           </div>
           <div class="meal-result-body">
-            <div class="ingredient-list">${r.tags.map(t => `<span class="ing-chip">${t}</span>`).join('')}</div>
+            ${ingredientDetails}
             <div class="meal-why"><span>★ Why this works</span>${r.why}</div>
+            ${canMake ? `<div class="recipe-calories"><strong>Calories provided:</strong> ${totalCalories} kcal</div>` : ''}
+            <div class="meal-action">${makeButtonHTML}</div>
           </div>
         </div>`;
     });
@@ -439,8 +705,7 @@ function goTo(step, skipRender) {
 }
 
 // ─── INIT ──────────────────────────────────────────────────────────────────────
-refreshInventory();
-
 document.addEventListener('DOMContentLoaded', () => {
+    refreshInventory();
     renderJobs();
 });
