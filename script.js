@@ -13,6 +13,7 @@ let state = {
 const cleanVal = (val) => val ? val.replace(/"/g, '').trim() : '';
 
 async function fetchFoodInventory() {
+    
   try {
     const response = await fetch(CSV_URL);
     const csvText = await response.text();
@@ -106,7 +107,7 @@ function renderJobs(filter = '') {
            onclick="selectJob('${j.name.replace(/'/g, "\\'")}')">
         <div class="job-name">${j.name}</div>
         <div class="job-stats">
-          <span class="stat-pill calories-pill">⚡ ${(j.dailyCalories ?? 0).toLocaleString()} kcal/day</span>
+          <span class="stat-pill calories-pill"> ${(j.dailyCalories ?? 0).toLocaleString()} kcal/day</span>
           <span class="stat-pill activity-pill">${j.activity}</span>
         </div>
         <div class="job-desc">${j.description}</div>
@@ -311,9 +312,7 @@ function renderResults(job, activeMeals, mode) {
           <div class="prep-body">
             <div class="prep-section">
               <div class="prep-section-title">Ingredients &amp; Portions</div>
-              <div class="prep-ing-header">
-                <span>Food item</span><span>Grams</span><span>Calories</span>
-              </div>
+              
               ${foodRows}
             </div>
             ${calBar(p.totalCals, p.targetCals)}
