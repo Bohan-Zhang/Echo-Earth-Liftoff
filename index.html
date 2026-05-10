@@ -194,28 +194,27 @@
 <!-- STEP 3 -->
 <div class="section" id="sec3">
   <div class="section-title">How would you like your meals planned?</div>
+  
   <div class="mode-cards">
-    <div class="mode-card" id="mode-recipe" onclick="selectMode('recipe')">
-      <span class="mode-icon">🍽️</span>
-      <div class="mode-title">Legacy Earth Recipes</div>
-      <div class="mode-desc">Choose from food 1000 years ago, before interstellar travel was possible.</div>
+
+    <div id="mode-prep" class="mode-card" onclick="selectMode('prep')">
+      <h3>Auto-Generated Prep</h3>
+      <p>Optimized nutrients based on your ship role.</p>
     </div>
-    <div class="mode-card" id="mode-prep" onclick="selectMode('prep')">
-      <span class="mode-icon">🧪</span>
-      <div class="mode-title">Optimised Meal Prep</div>
-      <div class="mode-desc">The system auto-builds your meals from raw ingredients calibrated to your exact job demands. Different every time you run it.</div>
-      <span class="mode-badge">Auto-generated for you</span>
+
+    <div id="mode-recipe" class="mode-card" onclick="selectMode('recipe')">
+      <h3>Legacy Earth Recipes</h3>
+      <p>Traditional meals with specific ingredients.</p>
     </div>
     
-    <!--
-    <div class="mode-card" id="mode-recipe" onclick="selectMode('recipe')">
-      <span class="mode-icon">🍽️</span>
-      <div class="mode-title">Legacy Earth Recipes</div>
-      <div class="mode-desc">Choose from culturally meaningful dishes adapted for space travel. Morale-boosting, familiar, and nutritionally matched to your role.</div>
-    </div>
-     -->
   </div>
-  <div class="nav-bar"><button class="btn" onclick="goTo(2)">← Back</button><button class="btn btn-primary" onclick="handleModeNext()" id="nextBtn3" disabled>Continue →</button></div>
+
+  <div class="nav-bar">
+    <button class="btn" onclick="goTo(2)">← Back</button>
+    <button class="btn btn-primary" onclick="handleModeNext()" id="nextBtn3" disabled>
+      Continue →
+    </button>
+  </div>
 </div>
 
 <!-- STEP 4 (recipes only) -->

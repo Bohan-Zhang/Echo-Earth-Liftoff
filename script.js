@@ -42,13 +42,19 @@ function toggleMeal(meal){
 }
 
 function selectMode(mode){
-  state.mode=mode;
-  document.getElementById('mode-recipe').classList.toggle('selected',mode==='recipe');
-  document.getElementById('mode-prep').classList.toggle('selected',mode==='prep');
-  document.getElementById('nextBtn3').disabled=false;
+  state.mode = mode;
+  
+  const recipeEl = document.getElementById('mode-recipe');
+  const prepEl = document.getElementById('mode-prep');
+  const btnEl = document.getElementById('nextBtn3');
+
+  // Only toggle if the element was actually found
+  if (recipeEl) recipeEl.classList.toggle('selected', mode === 'recipe');
+  if (prepEl) prepEl.classList.toggle('selected', mode === 'prep');
+  if (btnEl) btnEl.disabled = false;
 }
 
-function handleModeNext() {
+function handleModeNext() { // When you press continue ->
   console.log("Mode Next Clicked! Current Mode:", state.mode);
 
 
