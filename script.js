@@ -5,14 +5,15 @@
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAaI-jNgHTQwfnVgHlYrwbQ3ic1DVIpRKWB7H1f3jFbac3HtqG56FfvJF9EdOkm07wn0XG25XvK45m/pub?output=csv';
 // URL for food inventory CSV export from Google Sheets
 
-let state = {
-  step: 1,                        // Current step in the multi-step UI
-  job: null,                      // Selected job name
-  meals: { breakfast: true, lunch: true, dinner: true },
-  mode: null,                     // Selected workflow mode: recipe or prep
-  selections: { breakfast: null, lunch: null, dinner: null },
-  prepPlan: null,                 // Generated prep plan for inventory mode
-  foodInventory: []               // Loaded food inventory data
+let state = { 
+  step: 1,  // Step is the step in the process. Step 1 is telling it your job.
+  job: null, // We don't know yet
+  meals: { breakfast: true, lunch: true, dinner: true }, // Are you eating breakfast?
+  mode: null, // Mode is if you're just eating for nutrients, or if you're doing a traditional recipe from Earth.
+  selections: { breakfast: null, lunch: null, dinner: null }, // What are we actually eating for break, lunch, dinner
+  prepPlan: null, // This is the recipe in case you are doing a traditional recipe.
+  foodInventory: [], // Includes food and the stock.
+  inventoryLoaded: false 
 };
 
 // Utility: clean CSV cells by stripping quotes and trimming whitespace
@@ -25,20 +26,20 @@ async function fetchFoodInventory() {
     const csvText = await response.text();
     const rows = csvText.trim().split('\n');
 
-    state.foodInventory = rows.slice(1)
-      .map(row => {
-        const values = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-        const name     = cleanVal(values[1]);
-        const calories = parseFloat(cleanVal(values[2])) || 0;
-        const stock    = parseFloat(cleanVal(values[3])) || 0;
-        return { name, calories, stock };
-      })
-      .filter(f => f.name && f.calories > 0 && f.stock > 50);
+    // Save to global state so every other file can use it
+    state.foodInventory = rows.slice(1).map(row => {
+      const vals = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+      return {
+        name:     cleanVal(vals[1]),
+        calories: parseFloat(cleanVal(vals[2])) || 0,
+        stock:    parseFloat(cleanVal(vals[3])) || 0
+      };
+    }).filter(f => f.name !== ""); // Only keep rows with names
 
-    console.log(`[Inventory] Loaded ${state.foodInventory.length} available foods.`);
-    return true;
+    console.log("Inventory synced with Google Sheets.");
+    return true; 
   } catch (e) {
-    console.error('[Inventory] Failed to fetch food data:', e);
+    console.error("Sync failed:", e);
     return false;
   }
 }
@@ -195,7 +196,7 @@ async function handleModeNext() {
   } else {
     if (state.foodInventory.length === 0) {
       document.getElementById('nextBtn3').textContent = 'Loading inventory…';
-      await fetchFoodInventory();
+      await refreshInventory();
       document.getElementById('nextBtn3').textContent = 'Continue →';
     }
     state.prepPlan = generatePrep(job, active);
@@ -429,5 +430,5 @@ function goTo(step, skipRender) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-//  INIT
-fetchFoodInventory();
+// ─── INIT ──────────────────────────────────────────────────────────────────────
+refreshInventory();

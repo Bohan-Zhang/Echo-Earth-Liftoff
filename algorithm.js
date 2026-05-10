@@ -41,7 +41,7 @@ async function fetchFoodInventory() {
     setInvStatus('live', `${state.foodInventory.length} items in stock`);
   } catch(e) {
     setInvStatus('error', 'Inventory unavailable');
-    console.warn('[ShipFuel] Could not load inventory:', e);
+    console.warn('[Inventory] Could not load inventory:', e);
   }
 }
 
