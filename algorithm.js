@@ -82,6 +82,7 @@ function selectFoodsForMeal(pool, targetCals) {
 
 // Build the prep plan for each active meal based on the selected job's daily calorie target
 function generatePrep(job, activeMeals) {
+  // If no inventory data is available, return empty meal plans with a shortage message
   if (!state.foodInventory.length) {
     return activeMeals.map(meal => ({
       meal, foods:[], totalCals:0,
@@ -89,13 +90,34 @@ function generatePrep(job, activeMeals) {
       method: 'Not enough food is available.'
     }));
   }
-  return activeMeals.map(meal => {
+
+  // Clone inventory so selected quantities are deducted meal-by-meal.
+  // This prevents breakfast selections from reusing stock needed for lunch and dinner.
+  const inventory = state.foodInventory.map(item => ({ ...item }));
+  const prepPlan = activeMeals.map(meal => {
     const ratio      = MEAL_RATIOS[meal] || (1 / activeMeals.length);
     const targetCals = Math.round(job.dailyCalories * ratio);
-    const { foods, totalCals } = selectFoodsForMeal(state.foodInventory, targetCals);
-    const method = METHODS[Math.floor(Math.random() * METHODS.length)];
+    const { foods, totalCals } = selectFoodsForMeal(inventory, targetCals);
+
+    // Subtract used grams from inventory after each meal is planned.
+    // Later meals will see the updated remaining stock.
+    foods.forEach(f => {
+      const stockItem = inventory.find(i => i.name === f.name);
+      if (stockItem) {
+        stockItem.stock = Math.max(stockItem.stock - f.gramsUsed, 0);
+      }
+    });
+
+    const method = (foods.length === 0 || totalCals < targetCals)
+      ? 'Not enough food is available.'
+      : METHODS[Math.floor(Math.random() * METHODS.length)];
+
     return { meal, foods, totalCals, targetCals, method };
   });
+
+  // Save the updated inventory back to state so any later rerolls use the reduced stock.
+  state.foodInventory = inventory;
+  return prepPlan;
 }
 
 
@@ -304,7 +326,12 @@ function renderResults(job, activeMeals, mode) {
               <div class="prep-ing-portion">${f.gramsUsed} g</div>
               <div class="prep-ing-cals">${f.cals.toLocaleString()} kcal</div>
             </div>`).join('')
-        : `<div class="prep-no-foods">⚠ Not enough food is available.</div>`;
+        : `<div class="prep-no-foods"> Not enough food is available.</div>`;
+
+      // Show a shortage notice when some foods are available but the meal still falls short
+      const shortageNotice = (p.foods.length > 0 && p.totalCals < p.targetCals)
+        ? `<div class="prep-warning"> Not enough food is available to meet the meal target.</div>`
+        : '';
 
       mealsHTML += `
         <div class="prep-result-card">
@@ -317,6 +344,7 @@ function renderResults(job, activeMeals, mode) {
             <div class="prep-section">
               <div class="prep-section-title">Ingredients &amp; Portions</div>
               ${rows}
+              ${shortageNotice}
             </div>
             ${calBar(p.totalCals, p.targetCals)}
             <div class="prep-instructions"><b>How to prepare:</b> ${p.method}</div>

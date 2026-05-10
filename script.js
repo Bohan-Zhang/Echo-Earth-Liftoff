@@ -91,13 +91,33 @@ function generatePrep(job, activeMeals) {
     }));
   }
 
-  return activeMeals.map(meal => {
+  // Clone inventory so selected quantities are deducted meal-by-meal.
+  // This ensures earlier meals consume stock before later meals are generated.
+  const inventory = inStock.map(item => ({ ...item }));
+
+  const plan = activeMeals.map(meal => {
     const ratio      = MEAL_RATIOS[meal] || (1 / activeMeals.length);
     const targetCals = Math.round(job.dailyCalories * ratio);
-    const { foods, totalCals } = selectFoodsForMeal(inStock, targetCals);
-    const method = METHODS[Math.floor(Math.random() * METHODS.length)];
+    const { foods, totalCals } = selectFoodsForMeal(inventory, targetCals);
+
+    // Reduce used stock from the cloned inventory after generating this meal.
+    // Later meals will then see the updated remaining inventory.
+    foods.forEach(f => {
+      const stockItem = inventory.find(i => i.name === f.name);
+      if (stockItem) {
+        stockItem.stock = Math.max(stockItem.stock - f.gramsUsed, 0);
+      }
+    });
+
+    const method = (foods.length === 0 || totalCals < targetCals)
+      ? 'Not enough food is available.'
+      : METHODS[Math.floor(Math.random() * METHODS.length)];
+
     return { meal, foods, totalCals, targetCals, method };
   });
+
+  state.foodInventory = inventory;
+  return plan;
 }
 
 // JOB GRID
@@ -328,6 +348,12 @@ function renderResults(job, activeMeals, mode) {
             </div>`).join('')
         : `<div class="prep-no-foods">⚠ Not enough food is available.</div>`;
 
+      // If available foods were selected but still do not meet the calorie target,
+      // show an explicit shortage notice for that meal.
+      const shortageNotice = (p.foods.length > 0 && p.totalCals < p.targetCals)
+        ? `<div class="prep-warning">⚠ Not enough food is available to meet the meal target.</div>`
+        : '';
+
       mealsHTML += `
         <div class="prep-result-card">
           <div class="prep-result-header">
@@ -342,6 +368,7 @@ function renderResults(job, activeMeals, mode) {
               <div class="prep-section-title">Ingredients &amp; Portions</div>
               
               ${foodRows}
+              ${shortageNotice}
             </div>
             ${calBar(p.totalCals, p.targetCals)}
             <div class="prep-instructions">
