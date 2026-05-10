@@ -1,103 +1,175 @@
 const JOBS = [
-  { name: "EVA Engineer", type: "Physical", cal: 4500 },
-  { name: "Construction Specialist", type: "Physical", cal: 4500 },
-  { name: "Security Officer", type: "Security", cal: 3000 },
+  {
+    name: "Captain",
+    dailyCalories: 2400,
+    activity: "Light",
+    description: "Command, oversight & bridge watch. Mostly sedentary with high cognitive load."
+  },
+  {
+    name: "First Officer",
+    dailyCalories: 2300,
+    activity: "Light",
+    description: "Navigation, cargo planning, and watch-keeping duties."
+  },
+  {
+    name: "Second Officer",
+    dailyCalories: 2300,
+    activity: "Light",
+    description: "Safety officer, chart corrections, and navigation watch."
+  },
+  {
+    name: "Navigator",
+    dailyCalories: 2200,
+    activity: "Sedentary",
+    description: "Continuous chart plotting and GMDSS communications."
+  },
+  {
+    name: "Radio Operator",
+    dailyCalories: 2100,
+    activity: "Sedentary",
+    description: "Communications monitoring and equipment maintenance."
+  },
+
+  {
+    name: "Ship's Doctor",
+    dailyCalories: 2300,
+    activity: "Light",
+    description: "Medical consultations, clinic duties, and emergency response."
+  },
+  {
+    name: "Medic / Nurse",
+    dailyCalories: 2400,
+    activity: "Light",
+    description: "Patient care, rounds, and emergency first response."
+  },
+
+
+  {
+    name: "Cook / Chef",
+    dailyCalories: 2800,
+    activity: "Moderate",
+    description: "Galley operations, meal prep, and provisions management."
+  },
+  {
+    name: "Steward",
+    dailyCalories: 2700,
+    activity: "Moderate",
+    description: "Cabin service, laundry, and officer mess duties."
+  },
   
-  { name: "Technician", type: "Technical", cal: 2500 },
-  { name: "Robotics Mechanic", type: "Technical", cal: 2600 },
+  {
+    name: "Chief Engineer",
+    dailyCalories: 3000,
+    activity: "Moderate–Heavy",
+    description: "Engine room management, oversight of all machinery."
+  },
+  {
+    name: "Engineer Officer",
+    dailyCalories: 3200,
+    activity: "Heavy",
+    description: "Watch-keeping, machinery maintenance, and fault diagnosis."
+  },
+  {
+    name: "Electrician",
+    dailyCalories: 2900,
+    activity: "Moderate",
+    description: "Electrical systems, switchboards, and wiring repairs."
+  },
+  {
+    name: "Motorman",
+    dailyCalories: 3300,
+    activity: "Heavy",
+    description: "Engine room maintenance support and routine machinery care."
+  },
+  {
+    name: "Welder / Fitter",
+    dailyCalories: 3600,
+    activity: "Very Heavy",
+    description: "Metal fabrication, welding, and structural repairs at sea."
+  },
+  {
+    name: "Pump Man",
+    dailyCalories: 3300,
+    activity: "Heavy",
+    description: "Cargo pump operations, tank cleaning, and pipeline maintenance."
+  },
+
+  // ── Deck ──────────────────────────────────────────────────────────────────
+  {
+    name: "Boatswain (Bosun)",
+    dailyCalories: 3500,
+    activity: "Very Heavy",
+    description: "Deck crew supervision, rigging, mooring, and deck maintenance."
+  },
+  {
+    name: "Able Seaman (AB)",
+    dailyCalories: 3400,
+    activity: "Heavy",
+    description: "Deck watches, maintenance, mooring lines, and cargo operations."
+  },
+  {
+    name: "Ordinary Seaman (OS)",
+    dailyCalories: 3200,
+    activity: "Heavy",
+    description: "General deck duties, lookout, and maintenance tasks."
+  },
+  {
+    name: "Deck Hand",
+    dailyCalories: 3600,
+    activity: "Very Heavy",
+    description: "Physical deck labor: painting, chipping, rigging, and cargo."
+  },
+  {
+    name: "Cargo Handler",
+    dailyCalories: 3900,
+    activity: "Extreme",
+    description: "Direct cargo loading, unloading, and lashing — heavy physical work."
+  },
+  {
+    name: "Crane Operator",
+    dailyCalories: 2800,
+    activity: "Moderate",
+    description: "Operating ship cranes and cargo gear; prolonged sitting with high focus."
+  },
+
   
-  { name: "Medical Officer", type: "Cognitive", cal: 2500 },
-  { name: "AI Systems Operator", type: "Cognitive", cal: 2750 },
-  
-  { name: "Pilot / Navigator", type: "Navigation", cal: 3000 },
-  { name: "Hydroponics Farmer", type: "Navigation", cal: 3000 },
-  
-  { name: "Chef / Nutrition Designer", type: "Social", cal: 3500 },
-  { name: "Ship Teacher", type: "Social", cal: 4000 }
+  {
+    name: "Dive Supervisor",
+    dailyCalories: 3800,
+    activity: "Extreme",
+    description: "Saturation diving operations — extreme physical and pressure demands."
+  },
+  {
+    name: "Firefighter / Safety Officer",
+    dailyCalories: 3100,
+    activity: "Heavy",
+    description: "Fire drills, emergency response, and safety inspections."
+  },
+  {
+    name: "IT / Systems Tech",
+    dailyCalories: 2200,
+    activity: "Sedentary",
+    description: "Onboard IT infrastructure, satellite systems, and software."
+  }
 ];
 
-const RECIPES=[
-  
-  {flag:"🇮🇳",name:"Butter Chicken",origin:"India",tags:["lab-grown chicken","hydroponic tomatoes","synthetic dairy","algae oil","garlic","onions"],why:"A rich, creamy tomato-based curry with tender chicken slow-simmered in butter, cream, and warming spices like garam masala and fenugreek.",pro:8,carb:4,fat:7,vit:6,mealTypes:["lunch","dinner"]},
-  {flag:"🇮🇳",name:"Dal Tadka",origin:"India",tags:["lentils","fermented soy paste","onions","garlic","yeast cultures","spices"],why:"A comforting yellow lentil dish finished with a sizzling tempering of cumin, mustard seeds, dried chilli, and garlic poured over the top.",pro:7,carb:7,fat:3,vit:7,mealTypes:["breakfast","lunch","dinner"]},
-  {flag:"🇮🇳",name:"Masala Oats",origin:"India",tags:["oats","onions","hydroponic tomatoes","garlic","yeast cultures"],why:"Savoury rolled oats cooked with onions, tomatoes, mustard seeds, and curry leaves — a quick, filling Indian-style breakfast.",pro:5,carb:8,fat:3,vit:7,mealTypes:["breakfast"]},
-  {flag:"🇮🇳",name:"Chana Masala",origin:"India",tags:["chickpeas","hydroponic tomatoes","onions","garlic","bell peppers","spices"],why:"Hearty chickpeas simmered in a bold, tangy tomato and onion gravy punched with cumin, coriander, and dried mango powder.",pro:8,carb:7,fat:3,vit:8,mealTypes:["lunch","dinner"]},
-  {flag:"🇮🇳",name:"Khichdi",origin:"India",tags:["rice cultures","lentils","onions","garlic","seeds","yeast cultures"],why:"A one-pot dish of rice and lentils cooked down together with turmeric and cumin until soft and porridge-like — India's original comfort food.",pro:7,carb:8,fat:2,vit:7,mealTypes:["breakfast","lunch","dinner"]},
-  {flag:"🇯🇵",name:"Ramen",origin:"Japan",tags:["algae noodles","synthetic egg protein","seaweed sheets","fungal broth"],why:"Wheat noodles in a deeply flavoured umami broth — tonkotsu, shoyu, or miso — topped with a soft-boiled egg, nori, and sliced protein.",pro:7,carb:7,fat:4,vit:8,mealTypes:["lunch","dinner"]},
-  {flag:"🇯🇵",name:"Onigiri",origin:"Japan",tags:["rice cultures","seaweed sheets","fermented soy paste","seeds"],why:"Hand-pressed triangles of steamed rice wrapped in crisp nori and filled with seasoned protein — Japan's original portable fast food.",pro:4,carb:9,fat:2,vit:5,mealTypes:["breakfast","lunch"]},
-  {flag:"🇯🇵",name:"Miso Soup & Rice",origin:"Japan",tags:["fermented soy paste","seaweed sheets","rice cultures","mushrooms","yeast cultures"],why:"A delicate fermented soybean broth with silken tofu, wakame seaweed, and dashi — Japan's essential daily comfort meal, drunk straight from the bowl.",pro:5,carb:8,fat:2,vit:8,mealTypes:["breakfast","lunch"]},
-  {flag:"🇯🇵",name:"Tofu Teriyaki Bowl",origin:"Japan",tags:["soybeans","fermented soy paste","rice cultures","seaweed sheets","seeds","algae oil"],why:"Silken tofu glazed in a sweet-savoury soy and mirin teriyaki sauce, served over steamed rice with toasted sesame seeds and pickled ginger.",pro:8,carb:7,fat:5,vit:8,mealTypes:["lunch","dinner"]},
-  {flag:"🇲🇽",name:"Tacos",origin:"Mexico",tags:["insect protein tortillas","lentils","lab-grown chicken","hydroponic vegetables"],why:"Warm corn tortillas filled with seasoned protein, fresh salsa, lime, and cilantro — Mexico's iconic street food, infinitely adaptable.",pro:9,carb:6,fat:4,vit:7,mealTypes:["lunch","dinner"]},
-  {flag:"🇲🇽",name:"Black Bean Burrito",origin:"Mexico",tags:["soybeans","rice cultures","hydroponic lettuce","fermented soy paste","bell peppers"],why:"A layered wrap of seasoned black beans, cilantro-lime rice, roasted peppers, and sour cream — the handheld meal built for big appetite.",pro:8,carb:8,fat:3,vit:6,mealTypes:["lunch","dinner"]},
-  {flag:"🇲🇽",name:"Pozole de Hongos",origin:"Mexico",tags:["mycoprotein fungi","hydroponic vegetables","onions","garlic","herbs","bell peppers"],why:"A rich Mexican hominy stew with mushrooms in a deep, chile-infused red or green broth, topped with shredded cabbage and lime.",pro:7,carb:7,fat:3,vit:8,mealTypes:["lunch","dinner"]},
-  {flag:"🇬🇧",name:"Shepherd's Pie",origin:"United Kingdom",tags:["hydroponic potatoes","mycoprotein fungi","algae oil","onions","garlic"],why:"Minced meat in rich gravy topped with creamy mashed potato and baked until golden — Britain's definitive cold-weather comfort dish.",pro:7,carb:8,fat:5,vit:6,mealTypes:["dinner"]},
-  {flag:"🇬🇧",name:"Porridge & Seeds",origin:"United Kingdom",tags:["oats","seeds","fruit cell cultures","yeast cultures"],why:"Slow-rolled oats cooked to a creamy consistency and finished with fruit and seeds — Britain's timeless morning staple.",pro:5,carb:8,fat:5,vit:7,mealTypes:["breakfast"]},
-  {flag:"🇬🇧",name:"Lentil Cottage Pie",origin:"United Kingdom",tags:["lentils","hydroponic potatoes","mushrooms","onions","garlic"],why:"A plant-based take on cottage pie — spiced lentils in a dark, savoury gravy under a golden mashed potato crust.",pro:8,carb:8,fat:2,vit:7,mealTypes:["lunch","dinner"]},
-  {flag:"🇰🇷",name:"Bibimbap",origin:"South Korea",tags:["rice cultures","hydroponic greens","synthetic egg protein","fermented soy paste"],why:"A vibrant bowl of steamed rice topped with individually seasoned vegetables, a fried egg, and gochujang paste — stirred together before eating.",pro:7,carb:8,fat:5,vit:9,mealTypes:["lunch","dinner"]},
-  {flag:"🇰🇷",name:"Kimchi Fried Rice",origin:"South Korea",tags:["rice cultures","fermented soy paste","synthetic egg protein","seaweed sheets","yeast cultures"],why:"Day-old rice stir-fried with tangy kimchi, egg, and sesame oil until fragrant and slightly caramelised at the edges.",pro:6,carb:8,fat:4,vit:8,mealTypes:["breakfast","lunch"]},
-  {flag:"🇰🇷",name:"Sundubu Jjigae",origin:"South Korea",tags:["soybeans","mushrooms","hydroponic greens","seaweed sheets","fermented soy paste","synthetic egg protein"],why:"A bubbling, fiery stew of silken tofu, mushrooms, and vegetables in a spiced anchovy broth, finished with a raw egg cracked in at the table.",pro:8,carb:4,fat:5,vit:9,mealTypes:["breakfast","lunch","dinner"]},
-  {flag:"🇮🇹",name:"Margherita Pizza",origin:"Italy",tags:["algae flour crust","hydroponic tomatoes","synthetic dairy","herbs"],why:"A Neapolitan flatbread with San Marzano tomato sauce, fresh mozzarella, and basil, baked at scorching heat — the original and definitive pizza.",pro:6,carb:8,fat:6,vit:7,mealTypes:["lunch","dinner"]},
-  {flag:"🇮🇹",name:"Pasta e Fagioli",origin:"Italy",tags:["lentils","chickpeas","fermented soy paste","onions","garlic","seaweed sheets"],why:"A thick, rustic Italian soup of short pasta and creamy white beans in a garlicky tomato and rosemary broth.",pro:8,carb:8,fat:2,vit:7,mealTypes:["lunch","dinner"]},
-  {flag:"🇮🇹",name:"Risotto ai Funghi",origin:"Italy",tags:["rice cultures","mycoprotein fungi","synthetic dairy","yeast cultures","onions","algae oil"],why:"Arborio rice stirred slowly with white wine, mushroom stock, and parmesan until creamy — one of Italy's most technically satisfying dishes.",pro:6,carb:8,fat:6,vit:7,mealTypes:["dinner"]},
-  {flag:"🇻🇳",name:"Pho",origin:"Vietnam",tags:["algae broth","rice cultures","hydroponic herbs","cultured beef strips"],why:"A clear, aromatic rice noodle broth simmered for hours with star anise and charred ginger, served with fresh herbs, bean sprouts, and lime.",pro:7,carb:7,fat:3,vit:9,mealTypes:["breakfast","lunch","dinner"]},
-  {flag:"🇻🇳",name:"Bánh Mì Bowl",origin:"Vietnam",tags:["insect protein flour","fermented soy paste","hydroponic lettuce","rice cultures"],why:"A deconstructed bánh mì — pickled vegetables, crispy protein, and fresh herbs over rice, hitting every note of sweet, sour, salty, and umami.",pro:8,carb:7,fat:4,vit:7,mealTypes:["lunch"]},
-  {flag:"🕌",name:"Falafel Wraps",origin:"Middle East",tags:["chickpeas","algae flatbread","hydroponic lettuce","herbs","garlic"],why:"Crispy chickpea fritters spiced with cumin and coriander, wrapped in flatbread with tahini, pickled vegetables, and fresh herbs.",pro:8,carb:7,fat:4,vit:6,mealTypes:["lunch","dinner"]},
-  {flag:"🇪🇹",name:"Shakshuka",origin:"North Africa",tags:["hydroponic tomatoes","synthetic egg protein","onions","garlic","bell peppers","spices"],why:"Eggs poached directly in a spiced, bubbling tomato and pepper sauce, cooked and eaten straight from the pan with crusty bread.",pro:7,carb:5,fat:5,vit:9,mealTypes:["breakfast","lunch"]},
-  {flag:"🕌",name:"Hummus & Flatbread",origin:"Middle East",tags:["chickpeas","algae oil","garlic","algae flatbread","seeds"],why:"Silky-smooth blended chickpeas with tahini, lemon, and garlic, drizzled with olive oil — served with warm flatbread for communal dipping.",pro:6,carb:7,fat:6,vit:6,mealTypes:["breakfast","lunch"]},
-  {flag:"🇲🇦",name:"Tagine de Lentilles",origin:"Morocco",tags:["lentils","hydroponic tomatoes","onions","garlic","sweet potatoes","spices"],why:"A slow-braised Moroccan stew of lentils, preserved lemon, and ras el hanout spice blend cooked in a traditional conical clay pot.",pro:8,carb:8,fat:2,vit:9,mealTypes:["lunch","dinner"]},
-  {flag:"🇪🇬",name:"Koshari",origin:"Egypt",tags:["rice cultures","lentils","chickpeas","onions","hydroponic tomatoes","garlic"],why:"Egypt's beloved street food — a layered bowl of rice, lentils, and chickpeas topped with spiced tomato sauce and crispy fried onions.",pro:8,carb:9,fat:2,vit:7,mealTypes:["lunch","dinner"]},
-  {flag:"🇨🇳",name:"Fried Rice",origin:"China",tags:["rice cultures","synthetic egg protein","hydroponic vegetables","fermented soy paste"],why:"Day-old rice stir-fried at high heat with egg, spring onion, and soy sauce — the definitive way to transform leftover grains into a meal.",pro:6,carb:8,fat:4,vit:6,mealTypes:["breakfast","lunch","dinner"]},
-  {flag:"🇨🇳",name:"Congee",origin:"China",tags:["rice cultures","seaweed sheets","fermented soy paste","mushrooms"],why:"A slow-cooked rice porridge with a silky, smooth consistency, eaten with pickled vegetables, sesame oil, and egg — China's ultimate comfort food.",pro:4,carb:8,fat:1,vit:7,mealTypes:["breakfast"]},
-  {flag:"🇨🇳",name:"Mapo Tofu",origin:"China",tags:["soybeans","mycoprotein fungi","fermented soy paste","onions","garlic","algae oil"],why:"Silken tofu in a fiery, numbing sauce of fermented black beans, doubanjiang chilli paste, and Sichuan peppercorns — one of China's most iconic dishes.",pro:9,carb:3,fat:6,vit:7,mealTypes:["lunch","dinner"]},
-  {flag:"🇨🇦",name:"Poutine",origin:"Canada",tags:["hydroponic potato fries","synthetic dairy curds","mycoprotein gravy"],why:"Golden crispy fries piled with squeaky fresh cheese curds and smothered in rich brown gravy — Quebec's indulgent, iconic dish.",pro:5,carb:9,fat:6,vit:4,mealTypes:["lunch","dinner"]},
-  {flag:"🇪🇹",name:"Injera & Lentil Stew",origin:"Ethiopia",tags:["lentils","fermented soy paste","onions","garlic","bell peppers","yeast cultures"],why:"Sour fermented flatbread served alongside spiced red lentil stew, eaten communally by tearing injera and scooping the stew directly.",pro:8,carb:7,fat:2,vit:8,mealTypes:["lunch","dinner"]},
-  {flag:"🇪🇹",name:"Tibs Fitfit",origin:"Ethiopia",tags:["lab-grown chicken","fermented soy paste","onions","garlic","bell peppers","herbs"],why:"Torn injera tossed with sautéed spiced meat, onions, and berbere butter — a celebratory Ethiopian dish with bold, layered flavours.",pro:9,carb:4,fat:5,vit:8,mealTypes:["lunch","dinner"]},
-  {flag:"🇬🇷",name:"Greek Quinoa Bowl",origin:"Greece",tags:["quinoa","hydroponic tomatoes","synthetic dairy","algae oil","hydroponic herbs"],why:"A Mediterranean bowl of quinoa with cherry tomatoes, cucumber, olives, and crumbled feta drizzled with olive oil and oregano.",pro:7,carb:7,fat:6,vit:9,mealTypes:["breakfast","lunch"]},
-  {flag:"🇵🇪",name:"Quinoa Stew",origin:"Peru",tags:["quinoa","soybeans","sweet potatoes","onions","garlic","seeds"],why:"A thick Andean stew of quinoa, potato, and vegetables in a rich broth with huacatay herb — the ancient staple of Incan civilisations.",pro:8,carb:8,fat:4,vit:9,mealTypes:["lunch","dinner"]},
-  {flag:"🇵🇪",name:"Causa Rellena",origin:"Peru",tags:["hydroponic potatoes","lentils","algae oil","hydroponic lettuce","onions"],why:"A chilled layered terrine of yellow potato mash seasoned with lime and ají amarillo, filled with protein and avocado — elegant Peruvian comfort food.",pro:6,carb:9,fat:4,vit:7,mealTypes:["lunch","dinner"]},
-  {flag:"🇳🇬",name:"Jollof Rice & Beans",origin:"Nigeria",tags:["rice cultures","soybeans","hydroponic tomatoes","onions","bell peppers"],why:"Rice cooked in a rich, smoky tomato and pepper base — West Africa's most celebrated and hotly debated dish, with every nation claiming the best version.",pro:7,carb:8,fat:3,vit:7,mealTypes:["lunch","dinner"]},
-  {flag:"🇳🇬",name:"Egusi Soup",origin:"Nigeria",tags:["seeds","soybeans","hydroponic greens","onions","mushrooms","algae oil"],why:"A thick, rich stew of ground melon seeds cooked with leafy greens and palm oil — served with fufu or rice, one of Nigeria's most filling dishes.",pro:8,carb:4,fat:9,vit:8,mealTypes:["lunch","dinner"]},
-  {flag:"🇧🇷",name:"Feijão Tropeiro",origin:"Brazil",tags:["soybeans","rice cultures","synthetic egg protein","garlic","onions"],why:"A hearty Brazilian cowboy dish of black beans mixed with toasted cassava flour, egg, and crispy bacon — dense and deeply satisfying.",pro:8,carb:8,fat:4,vit:6,mealTypes:["lunch","dinner"]},
-  {flag:"🇹🇭",name:"Green Curry",origin:"Thailand",tags:["mycoprotein fungi","algae milk","hydroponic vegetables","rice cultures","herbs"],why:"Fresh green chilli paste simmered in coconut milk with vegetables and protein — aromatic from lemongrass and Thai basil, served over jasmine rice.",pro:6,carb:7,fat:7,vit:9,mealTypes:["lunch","dinner"]},
-  {flag:"🇹🇭",name:"Tom Yum Broth",origin:"Thailand",tags:["algae broth","mushrooms","lemongrass","hydroponic herbs","synthetic egg protein"],why:"A hot and sour Thai broth with galangal, lemongrass, kaffir lime, and mushrooms — fragrant, light, and deeply invigorating.",pro:5,carb:3,fat:3,vit:10,mealTypes:["breakfast","lunch","dinner"]},
-  {flag:"🇺🇸",name:"Protein Power Bowl",origin:"USA",tags:["insect protein flour","sweet potatoes","seeds","kale","algae oil"],why:"A build-your-own bowl of roasted sweet potato, insect protein, kale, seeds, and tahini — the modern American performance meal.",pro:9,carb:7,fat:6,vit:9,mealTypes:["breakfast","lunch"]},
-  {flag:"🇪🇸",name:"Vegetable Paella",origin:"Spain",tags:["rice cultures","bell peppers","onions","mushrooms","garlic","algae oil"],why:"Saffron-scented rice slow-cooked with colourful vegetables in a wide, shallow pan until the base caramelises into the prized socarrat.",pro:5,carb:9,fat:4,vit:8,mealTypes:["lunch","dinner"]},
-  {flag:"🇮🇷",name:"Ash Reshteh",origin:"Iran",tags:["lentils","chickpeas","soybeans","algae noodles","onions","herbs","yeast cultures"],why:"A thick Persian herb noodle soup with lentils, chickpeas, and spinach, topped with crispy onions and a swirl of kashk (whey) — a Persian new year staple.",pro:8,carb:8,fat:2,vit:9,mealTypes:["lunch","dinner"]},
-  {flag:"🇬🇭",name:"Red Red",origin:"Ghana",tags:["soybeans","sweet potatoes","onions","bell peppers","algae oil","hydroponic tomatoes"],why:"A Ghanaian black-eyed bean stew cooked in palm oil with tomatoes and spices, served with fried plantain — simple, vivid, and deeply satisfying.",pro:8,carb:7,fat:4,vit:8,mealTypes:["lunch","dinner"]},
-  {flag:"🇵🇭",name:"Sinigang na Gulay",origin:"Philippines",tags:["hydroponic vegetables","soybeans","mushrooms","onions","algae broth","garlic"],why:"A sour tamarind broth loaded with vegetables and protein — the Philippines' beloved souring soup, tart, warming, and deeply restorative.",pro:6,carb:5,fat:3,vit:10,mealTypes:["lunch","dinner"]},
-  {flag:"🇹🇷",name:"Mercimek Çorbası",origin:"Turkey",tags:["lentils","onions","garlic","hydroponic tomatoes","algae oil","spices"],why:"A silky-smooth red lentil soup finished with a swirl of paprika-infused butter — Turkey's most popular everyday soup, eaten from breakfast to dinner.",pro:8,carb:7,fat:3,vit:8,mealTypes:["breakfast","lunch","dinner"]},
-  {flag:"🇯🇲",name:"Ackee & Protein Hash",origin:"Jamaica",tags:["soybeans","hydroponic tomatoes","onions","bell peppers","algae oil","synthetic egg protein"],why:"Jamaica's national breakfast reimagined — ackee's buttery, egg-like texture paired with saltfish flavours, scotch bonnet, and tomato.",pro:7,carb:5,fat:7,vit:8,mealTypes:["breakfast","lunch"]},
-  {flag:"🇦🇷",name:"Locro Stew",origin:"Argentina",tags:["chickpeas","sweet potatoes","onions","garlic","bell peppers","seeds"],why:"A thick, hearty Argentine winter stew of maize, beans, and squash — slow-cooked for hours and eaten to celebrate national holidays.",pro:7,carb:8,fat:4,vit:8,mealTypes:["lunch","dinner"]},
-  {flag:"🇮🇩",name:"Nasi Goreng",origin:"Indonesia",tags:["rice cultures","synthetic egg protein","soybeans","fermented soy paste","garlic","onions"],why:"Indonesian fried rice with kecap manis (sweet soy), shallots, and chilli, topped with a fried egg and prawn crackers — the nation's beloved comfort food.",pro:7,carb:8,fat:5,vit:7,mealTypes:["breakfast","lunch","dinner"]},
-  {flag:"🇺🇦",name:"Borscht",origin:"Ukraine",tags:["hydroponic tomatoes","soybeans","onions","garlic","mushrooms","yeast cultures"],why:"A deep ruby-red beetroot soup with cabbage, potato, and carrots, finished with a swirl of sour cream and eaten with dark rye bread.",pro:6,carb:6,fat:2,vit:10,mealTypes:["lunch","dinner"]},
-  {flag:"🇸🇳",name:"Thieboudienne Bowl",origin:"Senegal",tags:["rice cultures","cultured fish cells","hydroponic tomatoes","onions","bell peppers","algae oil"],why:"Senegal's national dish — fish and vegetables cooked in a rich tomato sauce, then used to flavour the rice it's all served over.",pro:8,carb:8,fat:5,vit:8,mealTypes:["lunch","dinner"]},
-  {flag:"🇵🇰",name:"Daal Chawal",origin:"Pakistan",tags:["lentils","rice cultures","onions","garlic","spices","yeast cultures"],why:"Spiced yellow lentils served over steamed basmati rice — the everyday meal of hundreds of millions across South Asia, simple and deeply satisfying.",pro:8,carb:8,fat:2,vit:7,mealTypes:["breakfast","lunch","dinner"]},
-  {flag:"🇳🇵",name:"Dal Bhat",origin:"Nepal",tags:["lentils","rice cultures","spinach","garlic","onions","spices"],why:"The Nepali staple of lentil soup and steamed rice, eaten twice a day by most of the population — the fuel behind generations of Himalayan climbers.",pro:8,carb:8,fat:2,vit:9,mealTypes:["breakfast","lunch","dinner"]},
-  {flag:"🇲🇾",name:"Nasi Lemak Bowl",origin:"Malaysia",tags:["rice cultures","algae milk","insect protein flour","seaweed sheets","seeds","onions"],why:"Rice slow-cooked in coconut milk with pandan leaf until fragrant, served with sambal, egg, anchovies, and peanuts — Malaysia's national breakfast.",pro:7,carb:8,fat:6,vit:7,mealTypes:["breakfast","lunch"]},
-  {flag:"🇰🇪",name:"Ugali & Sukuma Wiki",origin:"Kenya",tags:["sweet potatoes","kale","soybeans","onions","algae oil","garlic"],why:"A stiff maize porridge paired with braised kale and onions — the everyday staple of East Africa, hearty and unpretentious.",pro:7,carb:8,fat:3,vit:10,mealTypes:["lunch","dinner"]},
-  {flag:"🇿🇦",name:"Umngqusho",origin:"South Africa",tags:["soybeans","sweet potatoes","onions","garlic","bell peppers","seeds"],why:"A Xhosa dish of samp (dried corn) and beans slow-cooked together until thick and creamy — a beloved staple with roots across southern Africa.",pro:8,carb:8,fat:3,vit:8,mealTypes:["lunch","dinner"]},
-  {flag:"🇷🇺",name:"Buckwheat Kasha",origin:"Russia",tags:["quinoa","mushrooms","onions","algae oil","yeast cultures","seeds"],why:"Roasted buckwheat groats cooked in broth with onions and mushrooms until nutty and fluffy — Russia's everyday grain dish, eaten at any meal.",pro:6,carb:8,fat:4,vit:8,mealTypes:["breakfast","lunch"]},
-  {flag:"🇵🇱",name:"Żurek Soup",origin:"Poland",tags:["lentils","mycoprotein fungi","onions","garlic","yeast cultures","soybeans"],why:"A tangy sour rye soup with white sausage and hard-boiled egg — built on a fermented rye starter that gives it a distinctive acidic depth unlike any other soup.",pro:7,carb:6,fat:3,vit:8,mealTypes:["breakfast","lunch","dinner"]},
-  {flag:"🇦🇪",name:"Harees",origin:"UAE / Gulf",tags:["oats","lab-grown chicken","onions","garlic","algae oil","spices"],why:"Slow-cooked cracked wheat and chicken pounded to a smooth, porridge-like consistency and topped with ghee — an ancient Gulf dish eaten at Ramadan and celebrations.",pro:8,carb:8,fat:4,vit:6,mealTypes:["breakfast","dinner"]},
-  {flag:"🇲🇲",name:"Mohinga",origin:"Myanmar",tags:["algae noodles","cultured fish cells","lemongrass","onions","garlic","herbs"],why:"Myanmar's national breakfast — a warming fish and lemongrass broth with rice noodles, crispy fritters, and fresh herbs, eaten street-side every morning.",pro:7,carb:6,fat:4,vit:9,mealTypes:["breakfast","lunch"]},
-];
- 
-];
-
-const ING={
-    protein: ["Soy Chunks", "Quorn", "Lentils"],
-    carbs: ["Rice", "Oats", "Pasta"],
-    fats: ["Olive Oil", "Nuts", "Avocado"],
-    vitamins: ["Kale", "Spinach", "Carrots"],
-    flavour: ["Garlic", "Soy Sauce", "Ginger"],
-    hydration: ["Electrolyte Pack", "Coconut Water"]
+const MEAL_RATIOS = {
+  breakfast: 0.25,   
+  lunch:     0.35,   
+  dinner:    0.40    
 };
 
-const METHODS=[
-  "Steam protein base · Roast root vegetables · Combine with mineral broth and seeds",
-  "Boil grain base · Pan-sear protein with aromatics · Finish with algae oil and vitamin greens",
-  "Simmer legumes with garlic and onions · Serve over grain · Top with omega-rich seeds",
-  "Stir-fry protein and vegetables over high heat · Add fermented paste · Serve over rice base",
-  "Blend protein and greens into a dense bowl · Drizzle with algae oil · Add grain crumble",
-  "Slow-cook legume and vegetable broth · Fortify with mineral mix · Pair with grain base",
+const METHODS = [
+  "Boil until tender, season with salt and serve hot.",
+  "Pan-fry in a light oil over medium heat until golden.",
+  "Steam for 12–15 minutes, preserving nutrients and texture.",
+  "Roast at 200 °C for 25 minutes until caramelised.",
+  "Stir-fry on high heat for 5–7 minutes, toss frequently.",
+  "Slow-cook on low heat for 45 minutes to develop flavour.",
+  "Microwave with a splash of water, covered, for 4–5 minutes.",
+  "Blanch in boiling water for 2 minutes, then ice-bath to retain colour.",
+  "Grill for 8–10 minutes, turning halfway through.",
+  "Bake covered at 180 °C for 30 minutes until soft through.",
+  "Sauté with aromatics over medium-high heat until fragrant.",
+  "Pressure-cook for 10 minutes to retain maximum nutrition."
 ];
