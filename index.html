@@ -7,20 +7,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:#04080f;--bg2:#080f1c;--bg3:#0c1628;--panel:#0e1a2e;--panel2:#111f35;
-    --border:rgba(21, 179, 246, 0.15);--border2:rgba(56,189,248,0.3);
-    --cyan:#38bdf8;--cyan2:#7dd3fc;--cyan-dim:rgba(102, 150, 171, 0.08);
-    --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.1);
-    --green:#34d399;--green-dim:rgba(52,211,153,0.1);
-    --purple:#d6c8ff;--purple-dim:rgba(82, 71, 114, 0.1);
-    --text:#e2f0ff;--text2:#8ba8c8;--text3:#5f8dba;
+    --bg:#060512;--bg2:#07132a;--bg3:#111a3f;--panel:#121e3d;--panel2:#17234a;
+    --border:rgba(103, 158, 255, 0.14);--border2:rgba(74, 200, 255, 0.26);
+    --cyan:#6de2ff;--cyan2:#b4f6ff;--cyan-dim:rgba(109,226,255,0.12);
+    --amber:#ffd66f;--amber-dim:rgba(255,214,111,0.14);
+    --green:#6ee3a5;--green-dim:rgba(110,227,165,0.14);
+    --purple:#d5b8ff;--purple-dim:rgba(126, 96, 218, 0.14);
+    --text:#eff7ff;--text2:#b0c7e1;--text3:#8aa7cc;
     --font-display:'Orbitron',monospace;--font-body:'DM Sans',sans-serif;
     --radius:6px;--radius-lg:10px;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden;}
-  body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(1px 1px at 10% 20%,rgba(255,255,255,0.6) 0%,transparent 100%),radial-gradient(1px 1px at 35% 60%,rgba(255,255,255,0.4) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 55% 10%,rgba(255,255,255,0.7) 0%,transparent 100%),radial-gradient(1px 1px at 80% 45%,rgba(255,255,255,0.3) 0%,transparent 100%),radial-gradient(1px 1px at 22% 80%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 90% 15%,rgba(255,255,255,0.6) 0%,transparent 100%),radial-gradient(1px 1px at 60% 85%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1px 1px at 95% 55%,rgba(255,255,255,0.5) 0%,transparent 100%);pointer-events:none;z-index:0;}
-  body::after{content:'';position:fixed;top:-20%;right:-10%;width:60vw;height:60vh;background:radial-gradient(ellipse,rgba(56,189,248,0.04) 0%,transparent 70%);pointer-events:none;z-index:0;}
+  body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(1px 1px at 8% 18%,rgba(255,255,255,0.8) 0%,transparent 100%),radial-gradient(1px 1px at 30% 55%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 52% 12%,rgba(255,255,255,0.7) 0%,transparent 100%),radial-gradient(1px 1px at 78% 40%,rgba(255,255,255,0.35) 0%,transparent 100%),radial-gradient(1px 1px at 20% 77%,rgba(255,255,255,0.55) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 88% 20%,rgba(255,255,255,0.65) 0%,transparent 100%),radial-gradient(1px 1px at 58% 82%,rgba(255,255,255,0.55) 0%,transparent 100%),radial-gradient(1px 1px at 94% 52%,rgba(255,255,255,0.55) 0%,transparent 100%),radial-gradient(2px 2px at 45% 35%,rgba(255,255,255,0.9) 0%,transparent 100%),radial-gradient(1px 1px at 70% 70%,rgba(220,230,255,0.4) 0%,transparent 100%);pointer-events:none;z-index:0;}
+  body::after{content:'';position:fixed;top:-20%;right:-10%;width:60vw;height:60vh;background:radial-gradient(ellipse,rgba(109,226,255,0.08) 0%,transparent 65%),radial-gradient(ellipse at 30% 70%,rgba(197,180,255,0.06) 0%,transparent 55%);pointer-events:none;z-index:0;}
   .container{max-width:1100px;margin:0 auto;padding:0 24px;position:relative;z-index:1;}
   header{padding:32px 0 24px;border-bottom:1px solid var(--border);margin-bottom:40px;}
   .header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
@@ -40,9 +40,8 @@
   .step-label{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);text-align:center;}
   .step.active .step-label{color:var(--cyan);}
   .step.done .step-label{color:var(--green);}
-  .section{display:none;animation:fadeIn 0.4s ease;}
+  .section{display:none;}
   .section.visible{display:block;}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
   .section-title{font-family:var(--font-display);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:20px;display:flex;align-items:center;gap:12px;}
   .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
   .job-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:32px;}
