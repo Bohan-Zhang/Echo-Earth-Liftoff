@@ -50,7 +50,7 @@ async function changeStock(foodName, amount) {
             })
         });
         setTimeout(loadData, 1500);
-    } cat   ch (e) {
+    } catch (e) {
         alert("Failed to update stock.");
     }
 }
