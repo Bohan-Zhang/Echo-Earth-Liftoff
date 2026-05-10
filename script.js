@@ -1,4 +1,5 @@
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAaI-jNgHTQwfnVgHlYrwbQ3ic1DVIpRKWB7H1f3jFbac3HtqG56FfvJF9EdOkm07wn0XG25XvK45m/pub?output=csv';
+
 let state = {
   step: 1,
   job: null,
@@ -6,7 +7,7 @@ let state = {
   mode: null,
   selections: { breakfast: null, lunch: null, dinner: null },
   prepPlan: null,
-  foodInventory: []   // populated from live CSV on load
+  foodInventory: []
 };
 
 const cleanVal = (val) => val ? val.replace(/"/g, '').trim() : '';
@@ -21,12 +22,11 @@ async function fetchFoodInventory() {
       .map(row => {
         const values = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
         const name     = cleanVal(values[1]);
-        const calories = parseFloat(cleanVal(values[2])) || 0; // kcal per 100 g
-        const stock    = parseFloat(cleanVal(values[3])) || 0; // grams in stock
-
+        const calories = parseFloat(cleanVal(values[2])) || 0;
+        const stock    = parseFloat(cleanVal(values[3])) || 0;
         return { name, calories, stock };
       })
-      .filter(f => f.name && f.calories > 0 && f.stock > 50); // only usable items
+      .filter(f => f.name && f.calories > 0 && f.stock > 50);
 
     console.log(`[Inventory] Loaded ${state.foodInventory.length} available foods.`);
     return true;
@@ -44,13 +44,13 @@ function selectFoodsForMeal(availableFoods, targetCals) {
 
   for (const food of pool) {
     const remaining = targetCals - totalCals;
-    if (remaining < 40) break;                          // close enough
+    if (remaining < 40) break;
 
     const maxContrib  = Math.min(remaining, targetCals * 0.40);
     const gramsNeeded = Math.round((maxContrib / food.calories) * 100);
-    const gramsUsed   = Math.min(gramsNeeded, food.stock, 350); // cap at 350 g
+    const gramsUsed   = Math.min(gramsNeeded, food.stock, 350);
 
-    if (gramsUsed < 30) continue;                        // too little to matter
+    if (gramsUsed < 30) continue;
 
     const calsFromFood = Math.round((gramsUsed * food.calories) / 100);
     if (calsFromFood < 30) continue;
@@ -63,22 +63,22 @@ function selectFoodsForMeal(availableFoods, targetCals) {
     });
 
     totalCals += calsFromFood;
-    if (totalCals >= targetCals * 0.93) break;           // ≥ 93 % of target → done
+    if (totalCals >= targetCals * 0.93) break;
   }
 
   return { foods: selected, totalCals };
 }
 
 function generatePrep(job, activeMeals) {
-  const inStock = state.foodInventory;   // already filtered for stock > 50 g
+  const inStock = state.foodInventory;
 
   if (inStock.length === 0) {
     return activeMeals.map(meal => ({
       meal,
-      foods:     [],
-      totalCals: 0,
+      foods:      [],
+      totalCals:  0,
       targetCals: Math.round(job.dailyCalories * (MEAL_RATIOS[meal] || 0.33)),
-      method:    'No foods currently in stock. Please restock inventory.'
+      method:     'No foods currently in stock. Please restock inventory.'
     }));
   }
 
@@ -87,7 +87,6 @@ function generatePrep(job, activeMeals) {
     const targetCals = Math.round(job.dailyCalories * ratio);
     const { foods, totalCals } = selectFoodsForMeal(inStock, targetCals);
     const method = METHODS[Math.floor(Math.random() * METHODS.length)];
-
     return { meal, foods, totalCals, targetCals, method };
   });
 }
@@ -95,13 +94,19 @@ function generatePrep(job, activeMeals) {
 function renderJobs(filter = '') {
   const f = filter.toLowerCase();
   document.getElementById('jobGrid').innerHTML = JOBS
-    .filter(j => j.name.toLowerCase().includes(f))
+    .filter(j => {
+      if (j.dailyCalories == null) {
+        console.warn('[ShipFuel] Job missing dailyCalories:', j);
+        return false;
+      }
+      return j.name.toLowerCase().includes(f);
+    })
     .map(j => `
       <div class="job-card ${state.job === j.name ? 'selected' : ''}"
            onclick="selectJob('${j.name.replace(/'/g, "\\'")}')">
         <div class="job-name">${j.name}</div>
         <div class="job-stats">
-          <span class="stat-pill calories-pill">⚡ ${j.dailyCalories.toLocaleString()} kcal/day</span>
+          <span class="stat-pill calories-pill">⚡ ${(j.dailyCalories ?? 0).toLocaleString()} kcal/day</span>
           <span class="stat-pill activity-pill">${j.activity}</span>
         </div>
         <div class="job-desc">${j.description}</div>
@@ -111,6 +116,7 @@ function renderJobs(filter = '') {
 renderJobs();
 
 function filterJobs(v) { renderJobs(v); }
+
 function selectJob(name) {
   state.job = name;
   renderJobs(document.getElementById('jobSearch').value);
@@ -141,7 +147,7 @@ function selectMode(mode) {
 }
 
 async function handleModeNext() {
-  if (!state.mode) { alert("Please select a mode first!"); return; }
+  if (!state.mode) { alert('Please select a mode first!'); return; }
 
   const job    = JOBS.find(j => j.name === state.job);
   const active = Object.entries(state.meals).filter(([, v]) => v).map(([k]) => k);
@@ -149,7 +155,6 @@ async function handleModeNext() {
   if (state.mode === 'recipe') {
     goTo(4);
   } else {
-
     if (state.foodInventory.length === 0) {
       document.getElementById('nextBtn3').textContent = 'Loading inventory…';
       await fetchFoodInventory();
@@ -280,7 +285,7 @@ function renderResults(job, activeMeals, mode) {
     mealsHTML += '</div>';
 
   } else {
-    let totalAchieved = state.prepPlan.reduce((s, p) => s + p.totalCals, 0);
+    const totalAchieved = state.prepPlan.reduce((s, p) => s + p.totalCals, 0);
 
     mealsHTML = '<div class="meals-output">';
 
@@ -304,7 +309,6 @@ function renderResults(job, activeMeals, mode) {
             </span>
           </div>
           <div class="prep-body">
-
             <div class="prep-section">
               <div class="prep-section-title">Ingredients &amp; Portions</div>
               <div class="prep-ing-header">
@@ -312,28 +316,27 @@ function renderResults(job, activeMeals, mode) {
               </div>
               ${foodRows}
             </div>
-
             ${calBar(p.totalCals, p.targetCals)}
-
             <div class="prep-instructions">
               <b>How to prepare:</b> ${p.method}
             </div>
-
           </div>
         </div>`;
     });
+
     mealsHTML += `
       </div>
       <div class="daily-summary">
         <div class="daily-summary-title">Daily Calorie Total</div>
         ${calBar(totalAchieved, totalDailyTarget)}
         <div class="daily-summary-note">
-          ${activeMeals.length} meal${activeMeals.length > 1 ? 's' : ''} planned 
+          ${activeMeals.length} meal${activeMeals.length > 1 ? 's' : ''} planned
           · ${state.foodInventory.length} food${state.foodInventory.length !== 1 ? 's' : ''} in stock
         </div>
       </div>
       <button class="reroll-btn" onclick="rerollPrep()">↻ Regenerate meal plan</button>`;
   }
+
   document.getElementById('resultContent').innerHTML = `
     <div class="result-hero">
       <div class="result-job">Shipboard Role</div>
@@ -372,6 +375,5 @@ function goTo(step, skipRender) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-// Pre-load inventory in the background so prep mode is instant
+// ─── INIT ──────────────────────────────────────────────────────────────────────
 fetchFoodInventory();

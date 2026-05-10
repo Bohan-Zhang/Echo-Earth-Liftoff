@@ -1,15 +1,17 @@
+const MEAL_RATIOS = { breakfast: 0.25, lunch: 0.35, dinner: 0.40 };
 
-const JOBS = [
-  { name: "EVA Engineer", type: "Physical", cal: 10, rating: "9.8/10" },
-  { name: "Construction Specialist", type: "Physical", cal: 10, rating: "9.7/10" },
-  { name: "Mining Specialist", type: "Physical", cal: 10, rating: "9.6/10" },
-  { name: "Security Officer", type: "Security", cal: 9, rating: "9.0/10" },
-  { name: "Technician", type: "Technical", cal: 8, rating: "8.7/10" },
-  { name: "Medical Officer", type: "Cognitive", cal: 5, rating: "7.9/10" },
-  { name: "AI Systems Operator", type: "Cognitive", cal: 4, rating: "7.8/10" },
-  { name: "Pilot / Navigator", type: "Navigation", cal: 6, rating: "8.0/10" },
-  { name: "Ship Teacher", type: "Social", cal: 4, rating: "6.8/10" }
+  const JOBS = [
+  { name: "EVA Engineer",             dailyCalories: 3800, activity: "Extreme",      description: "Extravehicular activity, hull repairs, and external construction in vacuum." },
+  { name: "Construction Specialist",  dailyCalories: 3600, activity: "Very Heavy",   description: "Structural assembly, welding, and heavy fabrication tasks aboard and outside the ship." },
+  { name: "Mining Specialist",        dailyCalories: 3700, activity: "Very Heavy",   description: "Drilling, extraction, and raw material processing in low-gravity environments." },
+  { name: "Security Officer",         dailyCalories: 3000, activity: "Heavy",        description: "Patrol, emergency response, and crew safety enforcement across all decks." },
+  { name: "Technician",               dailyCalories: 2900, activity: "Moderate",     description: "Systems maintenance, diagnostics, and equipment repair throughout the vessel." },
+  { name: "Medical Officer",          dailyCalories: 2400, activity: "Light",        description: "Medical consultations, surgery support, and crew health monitoring." },
+  { name: "AI Systems Operator",      dailyCalories: 2200, activity: "Sedentary",    description: "Oversight and management of onboard AI systems, data pipelines, and automation." },
+  { name: "Pilot / Navigator",        dailyCalories: 2600, activity: "Light",        description: "Flight operations, course plotting, and real-time navigation of the vessel." },
+  { name: "Ship Teacher",             dailyCalories: 2200, activity: "Sedentary",    description: "Education and cognitive development programs for crew and any dependants aboard." }
 ];
+
 
 const RECIPES=[
   {flag:"🇮🇳",name:"Butter Chicken",origin:"India",tags:["lab-grown chicken","hydroponic tomatoes","synthetic dairy","algae oil","garlic","onions"],why:"High morale meal. Strong cultural value. Protein-rich.",pro:8,carb:4,fat:7,vit:6,mealTypes:["lunch","dinner"]},
