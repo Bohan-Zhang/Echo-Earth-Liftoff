@@ -1,6 +1,6 @@
 const MEAL_RATIOS = { breakfast: 0.25, lunch: 0.35, dinner: 0.40 };
 
-  const JOBS = [
+const JOBS = [
   { name: "EVA Engineer",             dailyCalories: 3800, activity: "Extreme",      description: "Extravehicular activity, hull repairs, and external construction in vacuum." },
   { name: "Construction Specialist",  dailyCalories: 3600, activity: "Very Heavy",   description: "Structural assembly, welding, and heavy fabrication tasks aboard and outside the ship." },
   { name: "Mining Specialist",        dailyCalories: 3700, activity: "Very Heavy",   description: "Drilling, extraction, and raw material processing in low-gravity environments." },

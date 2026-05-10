@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAaI-jNgHTQwfnVgHlYrwbQ3ic1DVIpRKWB7H1f3jFbac3HtqG56FfvJF9EdOkm07wn0XG25XvK45m/pub?output=csv';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuPPX5kU97FxfAA7FwpBc-EUjixvC823LjEOSmyc_JvtRxgd5aoufuQ_ZP0CJ21OJq/exec';
 // URL for food inventory CSV export from Google Sheets
 
 let state = { 
@@ -20,7 +21,7 @@ let state = {
 const cleanVal = (val) => val ? val.replace(/"/g, '').trim() : '';
 
 // Load the food inventory from CSV and store it in state
-async function fetchFoodInventory() {
+async function refreshInventory() {
   try {
     const response = await fetch(CSV_URL);
     const csvText = await response.text();
@@ -44,7 +45,14 @@ async function fetchFoodInventory() {
   }
 }
 
+
+
+// ============================================================================
+// CALORIE OPTIMISER
+// ============================================================================
+
 // Select foods for a meal based on the calorie target and available stock
+
 function selectFoodsForMeal(availableFoods, targetCals) {
   const pool = [...availableFoods].sort(() => Math.random() - 0.5); // Randomize order for variety
 
@@ -145,7 +153,7 @@ function renderJobs(filter = '') {
       </div>`) 
     .join('');
 }
-renderJobs();
+
 
 // Filter jobs list when the user types in search
 function filterJobs(v) { renderJobs(v); }
@@ -432,3 +440,7 @@ function goTo(step, skipRender) {
 
 // ─── INIT ──────────────────────────────────────────────────────────────────────
 refreshInventory();
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderJobs();
+});

@@ -20,31 +20,6 @@ let state = {
 // Clean CSV values by stripping quotes and trimming whitespace
 const cleanVal = v => v ? v.replace(/"/g,'').trim() : '';
 
-// Fetch food inventory from the Google Sheet CSV and convert it into usable objects
-async function fetchFoodInventory() { 
-  setInvStatus('loading', 'Fetching inventory…'); // Show loading indicator while fetching
-  try {
-    const res  = await fetch(CSV_URL);
-    const text = await res.text();
-    const rows = text.trim().split('\n');
-
-    state.foodInventory = rows.slice(1).map(row => {
-      const vals = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-      return {
-        name:     cleanVal(vals[1]),
-        calories: parseFloat(cleanVal(vals[2])) || 0,
-        stock:    parseFloat(cleanVal(vals[3])) || 0
-      };
-    }).filter(f => f.name && f.calories > 0 && f.stock > 50); // Keep only valid inventory entries
-
-    state.inventoryLoaded = true;
-    setInvStatus('live', `${state.foodInventory.length} items in stock`);
-  } catch(e) {
-    setInvStatus('error', 'Inventory unavailable');
-    console.warn('[Inventory] Could not load inventory:', e);
-  }
-}
-
 // Update the inventory status indicator in the UI
 function setInvStatus(status, text) {
   const dot = document.getElementById('invDot');
@@ -53,9 +28,12 @@ function setInvStatus(status, text) {
   if (status === 'live')    { dot.classList.add('live'); }
   if (status === 'loading') { dot.classList.add('loading'); }
 }
-
+// ============================================================================
 // CALORIE OPTIMISER
+// ============================================================================
+
 // Choose a set of foods for a single meal that approximates the target calories
+
 function selectFoodsForMeal(pool, targetCals) {
   const foods    = [...pool].sort(() => Math.random() - 0.5); // Shuffle the inventory
   const selected = [];
@@ -66,7 +44,7 @@ function selectFoodsForMeal(pool, targetCals) {
     if (remaining < 40) break; // Stop once we are close enough to the target
 
     const maxContrib = Math.min(remaining, targetCals * 0.40);  // Limit each ingredient's contribution
-    const gNeeded    = Math.round((maxContrib / food.calories) * 100);
+    const gNeeded    = Math.round((maxContrib / food.calories) * 100); // Grams needed
     const gUsed      = Math.min(gNeeded, food.stock, 350);      // Respect stock and max portion sizes
     if (gUsed < 30) continue;                                  // Skip tiny portions
 
