@@ -642,441 +642,88 @@ body::before {
 // DATA — JOBS
 // ═══════════════════════════════════════════════════════════════════
 const JOBS = [
-  { name:"Captain",           dailyCalories:2400, activity:"Light",       description:"Command, oversight & bridge watch. High cognitive load, mostly sedentary." },
-  { name:"First Officer",     dailyCalories:2300, activity:"Light",       description:"Navigation, cargo planning, and watch-keeping duties." },
-  { name:"Second Officer",    dailyCalories:2300, activity:"Light",       description:"Safety officer, chart corrections, and navigation watch." },
-  { name:"Navigator",         dailyCalories:2200, activity:"Sedentary",   description:"Continuous chart plotting and GMDSS communications." },
-  { name:"Radio Operator",    dailyCalories:2100, activity:"Sedentary",   description:"Communications monitoring and equipment maintenance." },
-  { name:"Ship's Doctor",     dailyCalories:2300, activity:"Light",       description:"Medical consultations, clinic duties, and emergency response." },
-  { name:"Medic / Nurse",     dailyCalories:2400, activity:"Light",       description:"Patient care, rounds, and emergency first response." },
-  { name:"Cook / Chef",       dailyCalories:2800, activity:"Moderate",    description:"Galley operations, meal prep, and provisions management." },
-  { name:"Steward",           dailyCalories:2700, activity:"Moderate",    description:"Cabin service, laundry, and officer mess duties." },
-  { name:"Chief Engineer",    dailyCalories:3000, activity:"Moderate–Heavy", description:"Engine room management and oversight of all machinery." },
-  { name:"Engineer Officer",  dailyCalories:3200, activity:"Heavy",       description:"Watch-keeping, machinery maintenance, and fault diagnosis." },
-  { name:"Electrician",       dailyCalories:2900, activity:"Moderate",    description:"Electrical systems, switchboards, and wiring repairs." },
-  { name:"Motorman",          dailyCalories:3300, activity:"Heavy",       description:"Engine room maintenance support and routine machinery care." },
-  { name:"Welder / Fitter",   dailyCalories:3600, activity:"Very Heavy",  description:"Metal fabrication, welding, and structural repairs at sea." },
-  { name:"Pump Man",          dailyCalories:3300, activity:"Heavy",       description:"Cargo pump operations, tank cleaning, and pipeline maintenance." },
-  { name:"Boatswain (Bosun)", dailyCalories:3500, activity:"Very Heavy",  description:"Deck crew supervision, rigging, mooring, and deck maintenance." },
-  { name:"Able Seaman (AB)",  dailyCalories:3400, activity:"Heavy",       description:"Deck watches, maintenance, mooring lines, and cargo operations." },
-  { name:"Ordinary Seaman",   dailyCalories:3200, activity:"Heavy",       description:"General deck duties, lookout, and maintenance tasks." },
-  { name:"Deck Hand",         dailyCalories:3600, activity:"Very Heavy",  description:"Physical deck labor: painting, chipping, rigging, and cargo." },
-  { name:"Cargo Handler",     dailyCalories:3900, activity:"Extreme",     description:"Direct cargo loading, unloading, and lashing — demanding physical work." },
-  { name:"Crane Operator",    dailyCalories:2800, activity:"Moderate",    description:"Operating ship cranes and cargo gear; prolonged sitting with high focus." },
-  { name:"Dive Supervisor",   dailyCalories:3800, activity:"Extreme",     description:"Saturation diving operations — extreme physical and pressure demands." },
-  { name:"Safety Officer",    dailyCalories:3100, activity:"Heavy",       description:"Fire drills, emergency response, and safety inspections." },
-  { name:"IT / Systems Tech", dailyCalories:2200, activity:"Sedentary",   description:"Onboard IT infrastructure, satellite systems, and software." }
+  { name: "EVA Engineer", type: "Physical", cal: 10, rating: "9.8/10" },
+  { name: "Construction Specialist", type: "Physical", cal: 10, rating: "9.7/10" },
+  { name: "Mining Specialist", type: "Physical", cal: 10, rating: "9.6/10" },
+  { name: "Security Officer", type: "Security", cal: 9, rating: "9.0/10" },
+  { name: "Technician", type: "Technical", cal: 8, rating: "8.7/10" },
+  { name: "Medical Officer", type: "Cognitive", cal: 5, rating: "7.9/10" },
+  { name: "AI Systems Operator", type: "Cognitive", cal: 4, rating: "7.8/10" },
+  { name: "Pilot / Navigator", type: "Navigation", cal: 6, rating: "8.0/10" },
+  { name: "Ship Teacher", type: "Social", cal: 4, rating: "6.8/10" }
 ];
 
-// ═══════════════════════════════════════════════════════════════════
-// DATA — MEAL RATIOS & COOKING METHODS
-// ═══════════════════════════════════════════════════════════════════
-const MEAL_RATIOS = { breakfast: 0.25, lunch: 0.35, dinner: 0.40 };
-
-const METHODS = [
-  "Boil until tender, season lightly with salt and serve hot.",
-  "Pan-fry in a small amount of oil over medium heat until golden.",
-  "Steam for 12–15 minutes to preserve nutrients and texture.",
-  "Roast at 200 °C for 25 minutes until caramelised on the edges.",
-  "Stir-fry on high heat for 5–7 minutes, tossing frequently.",
-  "Slow-cook on low heat for 40 minutes to develop depth of flavour.",
-  "Microwave with a splash of water, covered, for 4–5 minutes.",
-  "Blanch in boiling water for 2 minutes, then shock in cold water.",
-  "Grill for 8–10 minutes, turning halfway through.",
-  "Bake covered at 180 °C for 30 minutes until soft through.",
-  "Sauté with aromatics over medium-high heat until fragrant.",
-  "Pressure-cook for 10 minutes to lock in maximum nutrition."
+const RECIPES=[
+  {flag:"🇮🇳",name:"Butter Chicken",origin:"India",tags:["lab-grown chicken","hydroponic tomatoes","synthetic dairy","algae oil","garlic","onions"],why:"High morale meal. Strong cultural value. Protein-rich.",pro:8,carb:4,fat:7,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇳",name:"Dal Tadka",origin:"India",tags:["lentils","fermented soy paste","onions","garlic","yeast cultures","spices"],why:"Sustainable lentil base. Excellent plant protein and fibre.",pro:7,carb:7,fat:3,vit:7,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇮🇳",name:"Masala Oats",origin:"India",tags:["oats","onions","hydroponic tomatoes","garlic","yeast cultures"],why:"High-satiety breakfast, sustained energy release.",pro:5,carb:8,fat:3,vit:7,mealTypes:["breakfast"]},
+  {flag:"🇮🇳",name:"Chana Masala",origin:"India",tags:["chickpeas","hydroponic tomatoes","onions","garlic","bell peppers","spices"],why:"Iron and fibre powerhouse. Fully plant-based, zero waste.",pro:8,carb:7,fat:3,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇳",name:"Khichdi",origin:"India",tags:["rice cultures","lentils","onions","garlic","seeds","yeast cultures"],why:"The original recovery meal. Easy digestion post-shift.",pro:7,carb:8,fat:2,vit:7,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇯🇵",name:"Ramen",origin:"Japan",tags:["algae noodles","synthetic egg protein","seaweed sheets","fungal broth"],why:"Efficient ingredients + comforting warmth.",pro:7,carb:7,fat:4,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇯🇵",name:"Onigiri",origin:"Japan",tags:["rice cultures","seaweed sheets","fermented soy paste","seeds"],why:"Compact, portable, high morale.",pro:4,carb:9,fat:2,vit:5,mealTypes:["breakfast","lunch"]},
+  {flag:"🇯🇵",name:"Miso Soup & Rice",origin:"Japan",tags:["fermented soy paste","seaweed sheets","rice cultures","mushrooms","yeast cultures"],why:"Probiotic-rich. Gut health critical on long voyages.",pro:5,carb:8,fat:2,vit:8,mealTypes:["breakfast","lunch"]},
+  {flag:"🇯🇵",name:"Tofu Teriyaki Bowl",origin:"Japan",tags:["soybeans","fermented soy paste","rice cultures","seaweed sheets","seeds","algae oil"],why:"Complete amino acids from soy. Algae oil boosts omega-3.",pro:8,carb:7,fat:5,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇲🇽",name:"Tacos",origin:"Mexico",tags:["insect protein tortillas","lentils","lab-grown chicken","hydroponic vegetables"],why:"Flexible recipe using minimal resources.",pro:9,carb:6,fat:4,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇲🇽",name:"Black Bean Burrito",origin:"Mexico",tags:["soybeans","rice cultures","hydroponic lettuce","fermented soy paste","bell peppers"],why:"Dense calorie and protein payload for heavy-duty crews.",pro:8,carb:8,fat:3,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🇲🇽",name:"Pozole de Hongos",origin:"Mexico",tags:["mycoprotein fungi","hydroponic vegetables","onions","garlic","herbs","bell peppers"],why:"Traditional stew adapted. Fungi = sustainable protein.",pro:7,carb:7,fat:3,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇬🇧",name:"Shepherd's Pie",origin:"United Kingdom",tags:["hydroponic potatoes","mycoprotein fungi","algae oil","onions","garlic"],why:"Dense calories for physical workers.",pro:7,carb:8,fat:5,vit:6,mealTypes:["dinner"]},
+  {flag:"🇬🇧",name:"Porridge & Seeds",origin:"United Kingdom",tags:["oats","seeds","fruit cell cultures","yeast cultures"],why:"Slow-release energy. Ideal pre-shift morning meal.",pro:5,carb:8,fat:5,vit:7,mealTypes:["breakfast"]},
+  {flag:"🇬🇧",name:"Lentil Cottage Pie",origin:"United Kingdom",tags:["lentils","hydroponic potatoes","mushrooms","onions","garlic"],why:"100% plant-based. Zero waste. High protein efficiency.",pro:8,carb:8,fat:2,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇰🇷",name:"Bibimbap",origin:"South Korea",tags:["rice cultures","hydroponic greens","synthetic egg protein","fermented soy paste"],why:"Balanced nutrition in one bowl.",pro:7,carb:8,fat:5,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇰🇷",name:"Kimchi Fried Rice",origin:"South Korea",tags:["rice cultures","fermented soy paste","synthetic egg protein","seaweed sheets","yeast cultures"],why:"Fermented foods support gut microbiome in zero-G.",pro:6,carb:8,fat:4,vit:8,mealTypes:["breakfast","lunch"]},
+  {flag:"🇰🇷",name:"Sundubu Jjigae",origin:"South Korea",tags:["soybeans","mushrooms","hydroponic greens","seaweed sheets","fermented soy paste","synthetic egg protein"],why:"Silken tofu stew. High protein, anti-inflammatory.",pro:8,carb:4,fat:5,vit:9,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇮🇹",name:"Margherita Pizza",origin:"Italy",tags:["algae flour crust","hydroponic tomatoes","synthetic dairy","herbs"],why:"Massive morale booster and social food.",pro:6,carb:8,fat:6,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇹",name:"Pasta e Fagioli",origin:"Italy",tags:["lentils","chickpeas","fermented soy paste","onions","garlic","seaweed sheets"],why:"Complete amino acid profile. Low resource cost.",pro:8,carb:8,fat:2,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇹",name:"Risotto ai Funghi",origin:"Italy",tags:["rice cultures","mycoprotein fungi","synthetic dairy","yeast cultures","onions","algae oil"],why:"Warming comfort food. Fungi = low-impact protein.",pro:6,carb:8,fat:6,vit:7,mealTypes:["dinner"]},
+  {flag:"🇻🇳",name:"Pho",origin:"Vietnam",tags:["algae broth","rice cultures","hydroponic herbs","cultured beef strips"],why:"Hydrating and efficient.",pro:7,carb:7,fat:3,vit:9,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇻🇳",name:"Bánh Mì Bowl",origin:"Vietnam",tags:["insect protein flour","fermented soy paste","hydroponic lettuce","rice cultures"],why:"Street-food efficiency. High morale from complex flavours.",pro:8,carb:7,fat:4,vit:7,mealTypes:["lunch"]},
+  {flag:"🌍",name:"Falafel Wraps",origin:"Middle East",tags:["chickpeas","algae flatbread","hydroponic lettuce","herbs","garlic"],why:"Cheap, sustainable protein source.",pro:8,carb:7,fat:4,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🌍",name:"Shakshuka",origin:"North Africa",tags:["hydroponic tomatoes","synthetic egg protein","onions","garlic","bell peppers","spices"],why:"Iron-rich, anti-inflammatory. Excellent crew wellness food.",pro:7,carb:5,fat:5,vit:9,mealTypes:["breakfast","lunch"]},
+  {flag:"🌍",name:"Hummus & Flatbread",origin:"Middle East",tags:["chickpeas","algae oil","garlic","algae flatbread","seeds"],why:"High-fibre snack. Excellent calcium source.",pro:6,carb:7,fat:6,vit:6,mealTypes:["breakfast","lunch"]},
+  {flag:"🌍",name:"Tagine de Lentilles",origin:"Morocco",tags:["lentils","hydroponic tomatoes","onions","garlic","sweet potatoes","spices"],why:"North African spice blend fights inflammation. Dense nutrients.",pro:8,carb:8,fat:2,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🌍",name:"Koshari",origin:"Egypt",tags:["rice cultures","lentils","chickpeas","onions","hydroponic tomatoes","garlic"],why:"Three complete proteins in one bowl.",pro:8,carb:9,fat:2,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇨🇳",name:"Fried Rice",origin:"China",tags:["rice cultures","synthetic egg protein","hydroponic vegetables","fermented soy paste"],why:"Uses leftovers efficiently with minimal waste.",pro:6,carb:8,fat:4,vit:6,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇨🇳",name:"Congee",origin:"China",tags:["rice cultures","seaweed sheets","fermented soy paste","mushrooms"],why:"Ultra light, restorative. Ideal for recovery days.",pro:4,carb:8,fat:1,vit:7,mealTypes:["breakfast"]},
+  {flag:"🇨🇳",name:"Mapo Tofu",origin:"China",tags:["soybeans","mycoprotein fungi","fermented soy paste","onions","garlic","algae oil"],why:"Complete protein. Spiced oil aids circulation on long shifts.",pro:9,carb:3,fat:6,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇨🇦",name:"Poutine",origin:"Canada",tags:["hydroponic potato fries","synthetic dairy curds","mycoprotein gravy"],why:"Comfort food during morale crises.",pro:5,carb:9,fat:6,vit:4,mealTypes:["lunch","dinner"]},
+  {flag:"🇪🇹",name:"Injera & Lentil Stew",origin:"Ethiopia",tags:["lentils","fermented soy paste","onions","garlic","bell peppers","yeast cultures"],why:"Fermented injera feeds gut biome. Lentils = zero-waste protein.",pro:8,carb:7,fat:2,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇪🇹",name:"Tibs Fitfit",origin:"Ethiopia",tags:["lab-grown chicken","fermented soy paste","onions","garlic","bell peppers","herbs"],why:"Protein-packed celebration dish. Community morale booster.",pro:9,carb:4,fat:5,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇬🇷",name:"Greek Quinoa Bowl",origin:"Greece",tags:["quinoa","hydroponic tomatoes","synthetic dairy","algae oil","hydroponic herbs"],why:"Complete protein from quinoa. Mediterranean longevity diet.",pro:7,carb:7,fat:6,vit:9,mealTypes:["breakfast","lunch"]},
+  {flag:"🇵🇪",name:"Quinoa Stew",origin:"Peru",tags:["quinoa","soybeans","sweet potatoes","onions","garlic","seeds"],why:"Andean superfood combo. Excellent for high-demand crew.",pro:8,carb:8,fat:4,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇵🇪",name:"Causa Rellena",origin:"Peru",tags:["hydroponic potatoes","lentils","algae oil","hydroponic lettuce","onions"],why:"Layered potato terrine. High-density carb for physical labour.",pro:6,carb:9,fat:4,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇳🇬",name:"Jollof Rice & Beans",origin:"Nigeria",tags:["rice cultures","soybeans","hydroponic tomatoes","onions","bell peppers"],why:"Culturally iconic across Africa. High morale from familiarity.",pro:7,carb:8,fat:3,vit:7,mealTypes:["lunch","dinner"]},
+  {flag:"🇳🇬",name:"Egusi Soup",origin:"Nigeria",tags:["seeds","soybeans","hydroponic greens","onions","mushrooms","algae oil"],why:"Melon seeds = extremely high fat and protein density.",pro:8,carb:4,fat:9,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇧🇷",name:"Feijão Tropeiro",origin:"Brazil",tags:["soybeans","rice cultures","synthetic egg protein","garlic","onions"],why:"Calorie-dense cowboy meal. Excellent for physical labour.",pro:8,carb:8,fat:4,vit:6,mealTypes:["lunch","dinner"]},
+  {flag:"🇹🇭",name:"Green Curry",origin:"Thailand",tags:["mycoprotein fungi","algae milk","hydroponic vegetables","rice cultures","herbs"],why:"Anti-inflammatory spices. Flavour complexity lifts morale.",pro:6,carb:7,fat:7,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇹🇭",name:"Tom Yum Broth",origin:"Thailand",tags:["algae broth","mushrooms","lemongrass","hydroponic herbs","synthetic egg protein"],why:"Hydrating immunity broth. Lemongrass combats space fatigue.",pro:5,carb:3,fat:3,vit:10,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇺🇸",name:"Protein Power Bowl",origin:"USA",tags:["insect protein flour","sweet potatoes","seeds","kale","algae oil"],why:"Designed for max performance. High protein density per gram.",pro:9,carb:7,fat:6,vit:9,mealTypes:["breakfast","lunch"]},
+  {flag:"🇪🇸",name:"Vegetable Paella",origin:"Spain",tags:["rice cultures","bell peppers","onions","mushrooms","garlic","algae oil"],why:"Communal dish — crew social bonding meal.",pro:5,carb:9,fat:4,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇷",name:"Ash Reshteh",origin:"Iran",tags:["lentils","chickpeas","soybeans","algae noodles","onions","herbs","yeast cultures"],why:"Thick Persian herb noodle soup. Rich in plant iron and folate.",pro:8,carb:8,fat:2,vit:9,mealTypes:["lunch","dinner"]},
+  {flag:"🇬🇭",name:"Red Red",origin:"Ghana",tags:["soybeans","sweet potatoes","onions","bell peppers","algae oil","hydroponic tomatoes"],why:"Black-eyed bean stew. Essential B-vitamins for nerve health.",pro:8,carb:7,fat:4,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇵🇭",name:"Sinigang na Gulay",origin:"Philippines",tags:["hydroponic vegetables","soybeans","mushrooms","onions","algae broth","garlic"],why:"Sour tamarind broth. Vitamin C boosts immune function.",pro:6,carb:5,fat:3,vit:10,mealTypes:["lunch","dinner"]},
+  {flag:"🇹🇷",name:"Mercimek Çorbası",origin:"Turkey",tags:["lentils","onions","garlic","hydroponic tomatoes","algae oil","spices"],why:"Red lentil soup. Simple, low-waste, high-iron.",pro:8,carb:7,fat:3,vit:8,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇯🇲",name:"Ackee & Protein Hash",origin:"Jamaica",tags:["soybeans","hydroponic tomatoes","onions","bell peppers","algae oil","synthetic egg protein"],why:"Cultural staple reimagined. Unique Caribbean nutrient profile.",pro:7,carb:5,fat:7,vit:8,mealTypes:["breakfast","lunch"]},
+  {flag:"🇦🇷",name:"Locro Stew",origin:"Argentina",tags:["chickpeas","sweet potatoes","onions","garlic","bell peppers","seeds"],why:"Thick winter stew. Dense calories for extreme physical work.",pro:7,carb:8,fat:4,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇮🇩",name:"Nasi Goreng",origin:"Indonesia",tags:["rice cultures","synthetic egg protein","soybeans","fermented soy paste","garlic","onions"],why:"Indonesia's comfort food. High morale, highly adaptable.",pro:7,carb:8,fat:5,vit:7,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇺🇦",name:"Borscht",origin:"Ukraine",tags:["hydroponic tomatoes","soybeans","onions","garlic","mushrooms","yeast cultures"],why:"Simulated beetroot base rich in nitrates. Boosts circulation.",pro:6,carb:6,fat:2,vit:10,mealTypes:["lunch","dinner"]},
+  {flag:"🇸🇳",name:"Thieboudienne Bowl",origin:"Senegal",tags:["rice cultures","cultured fish cells","hydroponic tomatoes","onions","bell peppers","algae oil"],why:"West Africa's favourite rice-fish dish. Rich in omega-3.",pro:8,carb:8,fat:5,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇵🇰",name:"Daal Chawal",origin:"Pakistan",tags:["lentils","rice cultures","onions","garlic","spices","yeast cultures"],why:"Complete protein combination. Cultural comfort across South Asia.",pro:8,carb:8,fat:2,vit:7,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇳🇵",name:"Dal Bhat",origin:"Nepal",tags:["lentils","rice cultures","spinach","garlic","onions","spices"],why:"Sherpa staple. High-altitude endurance food repurposed for space.",pro:8,carb:8,fat:2,vit:9,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇲🇾",name:"Nasi Lemak Bowl",origin:"Malaysia",tags:["rice cultures","algae milk","insect protein flour","seaweed sheets","seeds","onions"],why:"Aromatic coconut rice bowl. Cultural morale anchor for Southeast Asian crew.",pro:7,carb:8,fat:6,vit:7,mealTypes:["breakfast","lunch"]},
+  {flag:"🇰🇪",name:"Ugali & Sukuma Wiki",origin:"Kenya",tags:["sweet potatoes","kale","soybeans","onions","algae oil","garlic"],why:"East African staple. Kale = dense micronutrient source.",pro:7,carb:8,fat:3,vit:10,mealTypes:["lunch","dinner"]},
+  {flag:"🇿🇦",name:"Umngqusho",origin:"South Africa",tags:["soybeans","sweet potatoes","onions","garlic","bell peppers","seeds"],why:"Xhosa samp and beans dish. Complete plant protein pairing.",pro:8,carb:8,fat:3,vit:8,mealTypes:["lunch","dinner"]},
+  {flag:"🇷🇺",name:"Buckwheat Kasha",origin:"Russia",tags:["quinoa","mushrooms","onions","algae oil","yeast cultures","seeds"],why:"Buckwheat substitute. High magnesium for muscle recovery.",pro:6,carb:8,fat:4,vit:8,mealTypes:["breakfast","lunch"]},
+  {flag:"🇵🇱",name:"Żurek Soup",origin:"Poland",tags:["lentils","mycoprotein fungi","onions","garlic","yeast cultures","soybeans"],why:"Fermented rye soup adapted. Probiotic base for gut support.",pro:7,carb:6,fat:3,vit:8,mealTypes:["breakfast","lunch","dinner"]},
+  {flag:"🇦🇪",name:"Harees",origin:"UAE / Gulf",tags:["oats","lab-grown chicken","onions","garlic","algae oil","spices"],why:"Ancient wheat-meat porridge. High calorie density for demanding shifts.",pro:8,carb:8,fat:4,vit:6,mealTypes:["breakfast","dinner"]},
+  {flag:"🇲🇲",name:"Mohinga",origin:"Myanmar",tags:["algae noodles","cultured fish cells","lemongrass","onions","garlic","herbs"],why:"Myanmar's national breakfast. Warming fish noodle broth, immune support.",pro:7,carb:6,fat:4,vit:9,mealTypes:["breakfast","lunch"]},
 ];
 
-// ═══════════════════════════════════════════════════════════════════
-// DATA — RECIPES (Legacy Earth mode)
-// ═══════════════════════════════════════════════════════════════════
-const RECIPES = [
-  { name:"Chicken Congee",        origin:"China",     flag:"🇨🇳", mealTypes:["breakfast","lunch"], tags:["High Protein","Easy Digest","Low Fat"], why:"Gentle on the stomach during rough seas. High protein keeps energy steady across a long watch." },
-  { name:"Full English",          origin:"England",   flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", mealTypes:["breakfast"],          tags:["High Calorie","High Protein","Filling"], why:"Dense calories and protein to power through a cold morning watch at sea." },
-  { name:"Shakshuka",             origin:"Tunisia",   flag:"🇹🇳", mealTypes:["breakfast","lunch"], tags:["High Protein","Vitamin Rich","Warming"], why:"Eggs poached in spiced tomatoes deliver protein and lycopene — great before a long shift." },
-  { name:"Overnight Oats",        origin:"Scotland",  flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", mealTypes:["breakfast"],          tags:["Slow Release","Fibre Rich","Easy Prep"], why:"Complex carbs for sustained energy; no galley heat required — ideal during rough weather." },
-  { name:"Nasi Goreng",           origin:"Indonesia", flag:"🇮🇩", mealTypes:["lunch","dinner"],    tags:["High Carb","High Protein","Flavourful"], why:"Fried rice is calorically dense and fast to prepare, keeping the crew fuelled through afternoon watches." },
-  { name:"Lentil Dal",            origin:"India",     flag:"🇮🇳", mealTypes:["lunch","dinner"],    tags:["Plant Protein","Iron Rich","Anti-Inflammatory"], why:"Lentils provide sustained energy and iron — essential for crew working long physical shifts." },
-  { name:"Pasta e Fagioli",       origin:"Italy",     flag:"🇮🇹", mealTypes:["lunch","dinner"],    tags:["High Carb","High Protein","Hearty"], why:"Classic working-class fuel: beans and pasta together form a complete protein with high calorie density." },
-  { name:"Miso Salmon Rice",      origin:"Japan",     flag:"🇯🇵", mealTypes:["lunch","dinner"],    tags:["Omega-3","High Protein","Recovery"], why:"Omega-3 fatty acids reduce joint inflammation — key for crew doing repetitive manual labour." },
-  { name:"Beef Stew",             origin:"Ireland",   flag:"🇮🇪", mealTypes:["dinner"],            tags:["High Calorie","Iron Rich","Warming"], why:"Slow-cooked beef maximises iron and zinc absorption, replenishing minerals lost through physical work." },
-  { name:"Arroz con Pollo",       origin:"Spain",     flag:"🇪🇸", mealTypes:["lunch","dinner"],    tags:["Balanced","High Protein","One-Pot"], why:"One-pot efficiency in the galley with a balanced macro profile — ideal for large crew meals." },
-  { name:"Pho Bo",                origin:"Vietnam",   flag:"🇻🇳", mealTypes:["breakfast","lunch"], tags:["Hydrating","High Protein","Light"], why:"Bone broth replenishes electrolytes and collagen, supporting joint health during physical work." },
-  { name:"Jollof Rice & Chicken", origin:"Nigeria",   flag:"🇳🇬", mealTypes:["lunch","dinner"],    tags:["High Calorie","High Protein","Flavourful"], why:"Tomato-based rice with chicken provides high calories and vitamin C, great for demanding afternoon shifts." },
-  { name:"Tortilla Española",     origin:"Spain",     flag:"🇪🇸", mealTypes:["breakfast","lunch"], tags:["High Protein","Filling","Easy Prep"], why:"Egg and potato omelette is calorie-dense, easy to slice for crew, and holds well across meal times." },
-  { name:"Chicken Biryani",       origin:"Pakistan",  flag:"🇵🇰", mealTypes:["lunch","dinner"],    tags:["High Calorie","Aromatic","High Protein"], why:"Aromatic basmati with protein-rich chicken — high calorie density for crew in extreme activity roles." },
-  { name:"Bean & Cheese Burrito", origin:"Mexico",    flag:"🇲🇽", mealTypes:["breakfast","lunch","dinner"], tags:["High Calorie","Plant Protein","Portable"], why:"Portable and calorie-dense — easy to eat on watch. Beans + cheese form a complete amino acid profile." }
-];
-
-// ═══════════════════════════════════════════════════════════════════
-// INVENTORY FETCH
-// ═══════════════════════════════════════════════════════════════════
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAaI-jNgHTQwfnVgHlYrwbQ3ic1DVIpRKWB7H1f3jFbac3HtqG56FfvJF9EdOkm07wn0XG25XvK45m/pub?output=csv';
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuPPX5kU97FxfAA7FwpBc-EUjixvC823LjEOSmyc_JvtRxgd5aoufuQ_ZP0CJ21OJq/exec';
-
-let state = {
-  step: 1,
-  job: null,
-  meals: { breakfast: true, lunch: true, dinner: true },
-  mode: null,
-  selections: { breakfast: null, lunch: null, dinner: null },
-  prepPlan: null,
-  foodInventory: [],
-  inventoryLoaded: false
+const ING = {
+    energy: ["Soy Chunks", "Rice", "Oats", "Pasta", "Lentils", "Algae Oil", "Synthetic Potato"]
 };
 
-const cleanVal = v => v ? v.replace(/"/g,'').trim() : '';
-
-async function fetchFoodInventory() {
-  setInvStatus('loading', 'Fetching inventory…');
-  try {
-    const res  = await fetch(CSV_URL);
-    const text = await res.text();
-    const rows = text.trim().split('\n');
-
-    state.foodInventory = rows.slice(1).map(row => {
-      const vals = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-      return {
-        name:     cleanVal(vals[1]),
-        calories: parseFloat(cleanVal(vals[2])) || 0,
-        stock:    parseFloat(cleanVal(vals[3])) || 0
-      };
-    }).filter(f => f.name && f.calories > 0 && f.stock > 50);
-
-    state.inventoryLoaded = true;
-    setInvStatus('live', `${state.foodInventory.length} items in stock`);
-  } catch(e) {
-    setInvStatus('error', 'Inventory unavailable');
-    console.warn('[ShipFuel] Could not load inventory:', e);
-  }
-}
-
-function setInvStatus(status, text) {
-  const dot = document.getElementById('invDot');
-  document.getElementById('invText').textContent = text;
-  dot.className = 'inv-dot';
-  if (status === 'live')    { dot.classList.add('live'); }
-  if (status === 'loading') { dot.classList.add('loading'); }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// CALORIE OPTIMISER
-// ═══════════════════════════════════════════════════════════════════
-function selectFoodsForMeal(pool, targetCals) {
-  const foods    = [...pool].sort(() => Math.random() - 0.5);
-  const selected = [];
-  let   total    = 0;
-
-  for (const food of foods) {
-    const remaining = targetCals - total;
-    if (remaining < 40) break;
-
-    const maxContrib = Math.min(remaining, targetCals * 0.40);
-    const gNeeded    = Math.round((maxContrib / food.calories) * 100);
-    const gUsed      = Math.min(gNeeded, food.stock, 350);
-    if (gUsed < 30) continue;
-
-    const cals = Math.round((gUsed * food.calories) / 100);
-    if (cals < 30) continue;
-
-    selected.push({ name: food.name, gramsUsed: gUsed, cals, caloriesPer100g: food.calories });
-    total += cals;
-    if (total >= targetCals * 0.93) break;
-  }
-  return { foods: selected, totalCals: total };
-}
-
-function generatePrep(job, activeMeals) {
-  if (!state.foodInventory.length) {
-    return activeMeals.map(meal => ({
-      meal, foods:[], totalCals:0,
-      targetCals: Math.round(job.dailyCalories * (MEAL_RATIOS[meal] || 0.33)),
-      method: 'No foods in stock. Please restock inventory.'
-    }));
-  }
-  return activeMeals.map(meal => {
-    const ratio      = MEAL_RATIOS[meal] || (1 / activeMeals.length);
-    const targetCals = Math.round(job.dailyCalories * ratio);
-    const { foods, totalCals } = selectFoodsForMeal(state.foodInventory, targetCals);
-    const method = METHODS[Math.floor(Math.random() * METHODS.length)];
-    return { meal, foods, totalCals, targetCals, method };
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// JOB GRID
-// ═══════════════════════════════════════════════════════════════════
-function renderJobs(filter = '') {
-  const f = filter.toLowerCase();
-  document.getElementById('jobGrid').innerHTML = JOBS
-    .filter(j => j.name.toLowerCase().includes(f))
-    .map(j => `
-      <div class="job-card ${state.job === j.name ? 'selected' : ''}"
-           onclick="selectJob('${j.name.replace(/'/g,"\\'")}')">
-        <div class="job-name">${j.name}</div>
-        <div class="job-stats">
-          <span class="stat-pill calories-pill">⚡ ${j.dailyCalories.toLocaleString()} kcal</span>
-          <span class="stat-pill activity-pill">${j.activity}</span>
-        </div>
-        <div class="job-desc">${j.description}</div>
-      </div>`).join('');
-}
-
-function filterJobs(v) { renderJobs(v); }
-function selectJob(name) {
-  state.job = name;
-  renderJobs(document.getElementById('jobSearch').value);
-  document.getElementById('nextBtn1').disabled = false;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// MEAL TOGGLES
-// ═══════════════════════════════════════════════════════════════════
-function toggleMeal(meal) {
-  const on = state.meals[meal];
-  if (on && Object.values(state.meals).filter(Boolean).length <= 1) {
-    document.getElementById('mealWarn').classList.add('visible'); return;
-  }
-  document.getElementById('mealWarn').classList.remove('visible');
-  state.meals[meal] = !on;
-  const t = document.getElementById('tog-' + meal);
-  t.classList.toggle('on', !on);
-  t.querySelector('.toggle-knob').textContent = !on ? '✓' : '';
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// MODE SELECTION
-// ═══════════════════════════════════════════════════════════════════
-function selectMode(mode) {
-  state.mode = mode;
-  document.getElementById('mode-recipe').classList.toggle('selected', mode === 'recipe');
-  document.getElementById('mode-prep').classList.toggle('selected',   mode === 'prep');
-  document.getElementById('nextBtn3').disabled = false;
-}
-
-async function handleModeNext() {
-  if (!state.mode) { alert('Please select a mode.'); return; }
-  const job    = JOBS.find(j => j.name === state.job);
-  const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
-
-  if (state.mode === 'recipe') {
-    goTo(4);
-  } else {
-    if (!state.inventoryLoaded) {
-      const btn = document.getElementById('nextBtn3');
-      btn.textContent = 'Loading stock…'; btn.disabled = true;
-      await fetchFoodInventory();
-      btn.textContent = 'Continue →'; btn.disabled = false;
-    }
-    state.prepPlan = generatePrep(job, active);
-    renderResults(job, active, 'prep');
-    goTo(5, true);
-  }
-}
-
-function goBack() { goTo(state.mode === 'recipe' ? 4 : 3); }
-
-// ═══════════════════════════════════════════════════════════════════
-// RECIPE BROWSER
-// ═══════════════════════════════════════════════════════════════════
-function renderSec4() {
-  const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
-  state.selections = { breakfast:null, lunch:null, dinner:null };
-  const countries = [...new Set(RECIPES.map(r => r.origin))].sort();
-
-  let h = `<div class="country-filters">
-    <button class="country-btn active" onclick="filterCountry(this,'all')">All</button>
-    ${countries.map(c => `<button class="country-btn" onclick="filterCountry(this,'${c.replace(/'/g,"\\'")}')"> ${c}</button>`).join('')}
-  </div>`;
-
-  active.forEach(meal => {
-    h += `<div class="meal-slot-label">${meal.charAt(0).toUpperCase()+meal.slice(1)}</div>
-          <div class="recipe-grid" id="grid-${meal}">`;
-    RECIPES.filter(r => r.mealTypes.includes(meal)).forEach(r => {
-      h += `<div class="recipe-card" id="rc-${meal}-${san(r.name)}" onclick="selRec('${meal}','${r.name.replace(/'/g,"\\'")}')">
-              <span class="recipe-flag">${r.flag}</span>
-              <div class="recipe-info">
-                <div class="recipe-name">${r.name}</div>
-                <div class="recipe-origin">${r.origin}</div>
-                <div class="recipe-adapt">${r.tags.slice(0,3).map(t=>`<span class="adapt-tag">${t}</span>`).join('')}</div>
-              </div>
-            </div>`;
-    });
-    h += `</div>`;
-  });
-  document.getElementById('sec4Content').innerHTML = h;
-  checkDone();
-}
-
-const san = s => s.replace(/[^a-zA-Z0-9]/g,'_');
-
-function selRec(meal, name) {
-  state.selections[meal] = name;
-  const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
-  active.forEach(m => {
-    RECIPES.filter(r => r.mealTypes.includes(m)).forEach(r => {
-      const el = document.getElementById(`rc-${m}-${san(r.name)}`);
-      if (el) el.classList.toggle('selected', state.selections[m] === r.name);
-    });
-  });
-  checkDone();
-}
-
-function checkDone() {
-  const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
-  document.getElementById('nextBtn4').disabled = !active.every(m => state.selections[m] !== null);
-}
-
-function filterCountry(btn, country) {
-  document.querySelectorAll('.country-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
-  active.forEach(meal => {
-    const g = document.getElementById('grid-'+meal); if (!g) return;
-    g.querySelectorAll('.recipe-card').forEach(card => {
-      const o = card.querySelector('.recipe-origin').textContent;
-      card.style.display = (country==='all' || o===country || o.includes(country)) ? '' : 'none';
-    });
-  });
-}
-
-function buildRecipePlan() {
-  const job    = JOBS.find(j => j.name === state.job);
-  const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
-  renderResults(job, active, 'recipe');
-  goTo(5, true);
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// REROLL
-// ═══════════════════════════════════════════════════════════════════
-function rerollPrep() {
-  const job    = JOBS.find(j => j.name === state.job);
-  const active = Object.entries(state.meals).filter(([,v]) => v).map(([k]) => k);
-  state.prepPlan = generatePrep(job, active);
-  renderResults(job, active, 'prep');
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// CALORIE BAR HELPER
-// ═══════════════════════════════════════════════════════════════════
-function calBar(got, target) {
-  const pct   = Math.min(Math.round((got / target) * 100), 100);
-  const color = pct >= 90 ? 'var(--green)' : pct >= 65 ? 'var(--warn)' : 'var(--red)';
-  return `<div class="cal-bar-wrap">
-    <div class="cal-bar-track"><div class="cal-bar-fill" style="width:${pct}%;background:${color}"></div></div>
-    <span class="cal-bar-label">${got.toLocaleString()} / ${target.toLocaleString()} kcal &nbsp;·&nbsp; ${pct}%</span>
-  </div>`;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// RENDER RESULTS
-// ═══════════════════════════════════════════════════════════════════
-function renderResults(job, activeMeals, mode) {
-  let mealsHTML = '';
-
-  if (mode === 'recipe') {
-    mealsHTML = '<div class="meals-output">';
-    activeMeals.forEach(meal => {
-      const r = RECIPES.find(x => x.name === state.selections[meal]); if (!r) return;
-      mealsHTML += `
-        <div class="meal-result">
-          <div class="meal-result-header">
-            <span class="meal-time-badge ${meal}">${meal}</span>
-            <span class="meal-result-name">${r.flag} ${r.name}</span>
-            <span style="margin-left:auto;font-size:11px;color:var(--text3)">${r.origin}</span>
-          </div>
-          <div class="meal-result-body">
-            <div class="ingredient-list">${r.tags.map(t=>`<span class="ing-chip">${t}</span>`).join('')}</div>
-            <div class="meal-why"><span>★ Why this works</span>${r.why}</div>
-          </div>
-        </div>`;
-    });
-    mealsHTML += '</div>';
-
-  } else {
-    const totalAchieved = state.prepPlan.reduce((s,p) => s + p.totalCals, 0);
-    mealsHTML = '<div class="meals-output">';
-
-    state.prepPlan.forEach(p => {
-      const rows = p.foods.length
-        ? p.foods.map(f => `
-            <div class="prep-ing-row">
-              <div class="prep-ing-name">${f.name}</div>
-              <div class="prep-ing-portion">${f.gramsUsed} g</div>
-              <div class="prep-ing-cals">${f.cals.toLocaleString()} kcal</div>
-            </div>`).join('')
-        : `<div class="prep-no-foods">⚠ No foods in stock. Please restock the inventory.</div>`;
-
-      mealsHTML += `
-        <div class="prep-result-card">
-          <div class="prep-result-header">
-            <span class="meal-time-badge ${p.meal}">${p.meal}</span>
-            <span class="prep-auto-label">Stock-optimised</span>
-            <span class="meal-calorie-target">Target: ${p.targetCals.toLocaleString()} kcal</span>
-          </div>
-          <div class="prep-body">
-            <div class="prep-section">
-              <div class="prep-section-title">Ingredients &amp; Portions</div>
-              <div class="prep-ing-header"><span>Food item</span><span>Grams</span><span>Calories</span></div>
-              ${rows}
-            </div>
-            ${calBar(p.totalCals, p.targetCals)}
-            <div class="prep-instructions"><b>How to prepare:</b> ${p.method}</div>
-          </div>
-        </div>`;
-    });
-
-    mealsHTML += `</div>
-      <div class="daily-summary">
-        <div class="daily-summary-title">Daily Calorie Total</div>
-        ${calBar(totalAchieved, job.dailyCalories)}
-        <div class="daily-summary-note">${activeMeals.length} meal${activeMeals.length>1?'s':''} planned &nbsp;·&nbsp; ${state.foodInventory.length} item${state.foodInventory.length!==1?'s':''} in stock</div>
-      </div>
-      <button class="btn btn-reroll" onclick="rerollPrep()">↻ Regenerate meal plan</button>`;
-  }
-
-  document.getElementById('resultContent').innerHTML = `
-    <div class="result-hero">
-      <div class="result-job">Shipboard Role</div>
-      <div class="result-headline">${job.name}</div>
-      <div class="result-sub">${job.activity} activity &nbsp;·&nbsp; ${job.dailyCalories.toLocaleString()} kcal/day target &nbsp;·&nbsp; ${activeMeals.length} meal${activeMeals.length>1?'s':''} &nbsp;·&nbsp; ${mode==='recipe'?'Legacy Earth Recipes':'Stock-Optimised Prep'}</div>
-      <div class="calorie-summary-strip">
-        <div class="csb-item">
-          <div class="csb-label">Daily Target</div>
-          <div class="csb-value">${job.dailyCalories.toLocaleString()}</div>
-        </div>
-        ${Object.entries(MEAL_RATIOS).filter(([m])=>activeMeals.includes(m)).map(([m,r])=>`
-          <div class="csb-item">
-            <div class="csb-label">${m.charAt(0).toUpperCase()+m.slice(1)}</div>
-            <div class="csb-value">${Math.round(job.dailyCalories*r).toLocaleString()}</div>
-          </div>`).join('')}
-      </div>
-    </div>
-    ${mealsHTML}`;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════════════════════════
-function goTo(step, skipRender) {
-  if (step === 4 && !skipRender) renderSec4();
-  for (let i = 1; i <= 5; i++) {
-    document.getElementById('sec'+i).classList.toggle('visible', i === step);
-    const s = document.getElementById('step'+i);
-    s.classList.toggle('active', i === step);
-    s.classList.toggle('done',   i < step);
-  }
-  state.step = step;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════════
-renderJobs();
-fetchFoodInventory();   // pre-load in background
-</script>
-</body>
-</html>
+const METHODS = [
+    "Flash-heat and compress into energy bar",
+    "Hydrate and blend into caloric shake",
+    "Pressure-cook and serve as high-density bowl"
+];
