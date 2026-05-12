@@ -1,4 +1,6 @@
+// ═══════════════════════════════════════════════════════════════════════════════
 // DATA & STATE
+// ═══════════════════════════════════════════════════════════════════════════════
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRAaI-jNgHTQwfnVgHlYrwbQ3ic1DVIpRKWB7H1f3jFbac3HtqG56FfvJF9EdOkm07wn0XG25XvK45m/pub?output=csv';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuPPX5kU97FxfAA7FwpBc-EUjixvC823LjEOSmyc_JvtRxgd5aoufuQ_ZP0CJ21OJq/exec';
@@ -86,7 +88,9 @@ async function changeStock(foodName, amount) {
     }
 }
 
+// ============================================================================
 // CALORIE OPTIMISER
+// ============================================================================
 
 // Select foods for a meal based on the calorie target and available stock
 
@@ -580,7 +584,7 @@ function renderResults(job, activeMeals, mode) {
       const checkResult = canMakeMeal(r);
       const canMake = checkResult.canMake;
       const statusClass = canMake ? 'can-make' : 'cannot-make';
-     
+      const statusIcon = canMake ? '✓' : '✗';
       const statusText = canMake ? 'Ready to prepare' : 'Insufficient ingredients';
       const totalCalories = checkResult.totalCalories;
       
